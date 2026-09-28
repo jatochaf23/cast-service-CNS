@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constancia de Atención Servicio Técnico - CAST Multimarca</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f1f5f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .form-container {
+            max-width: 850px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .form-header {
+            border-bottom: 2px solid #eee;
+            padding-bottom: 6px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .header-top {
+            margin-bottom: 6px;
+            width: 100%;
+        }
+
+        .header-logo-container {
+            width: 100%;
+        }
+
+        .header-logo-container img {
+            width: 100%;
+            max-width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .header-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-title {
+            text-align: left;
+        }
+
+        .contact-info p {
+            margin: 0;
+            font-size: 0.78em;
+            color: #666;
+        }
+
+        .form-title h2 {
+            margin: 4px 0 0 0;
+            font-size: 1.15em;
+            color: #0f172a;
+        }
+
+        .correlativo-number {
+            color: #dc2626;
+            font-weight: 800;
+            font-size: 1.05em;
+            margin-left: 6px;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            padding: 1px 6px;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+        }
+
+        .correlativo-number:hover {
+            background-color: #fee2e2;
+        }
+
+        .form-number-date {
+            text-align: right;
+        }
+
+        .date-field {
+            margin-top: 2px;
+        }
+
+        .form-section {
+            margin-bottom: 10px;
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background-color: #ffffff;
+        }
+
+        .form-section h3 {
+            margin: 2px 0 8px 0;
+            font-size: 1em;
+            color: #0f172a;
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 8px 12px;
+        }
+
+        .grid-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            margin-bottom: 3px;
+            font-weight: bold;
+            font-size: 0.88em;
+            color: #334155;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        input[type="time"],
+        textarea {
+            width: 100%;
+            padding: 5px 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 0.88em;
+            line-height: 1.25;
+        }
+
+        .form-section > label {
+            display: block;
+            margin-top: 5px;
+            margin-bottom: 2px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+
+        .checkbox-group.single-line {
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .checkbox-group label {
+            font-weight: normal;
+            white-space: nowrap;
+        }
+
+        .parts-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 6px;
+        }
+
+        .parts-header h3 {
+            margin: 0 !important;
+        }
+
+        .radio-inline {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .radio-inline label {
+            font-weight: normal;
+            margin: 0;
+            font-size: 0.9em;
+        }
+
+        .parts-grid-tripled {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px 12px;
+        }
+
+        .parts-col-header {
+            display: grid;
+            grid-template-columns: 45px 1fr;
+            gap: 4px;
+            font-size: 0.82em;
+            font-weight: bold;
+            color: #475569;
+        }
+
+        .parts-pair {
+            display: grid;
+            grid-template-columns: 45px 1fr;
+            gap: 4px;
+        }
+
+        .satisfaction-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 6px;
+        }
+
+        .satisfaction-group label {
+            font-weight: normal;
+        }
+
+        .time-inputs-single-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #e2e8f0;
+        }
+
+        .time-field-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .time-field-item label {
+            margin: 0;
+            font-size: 0.82em;
+            font-weight: bold;
+            color: #1e293b;
+            white-space: nowrap;
+        }
+
+        .time-field-item input[type="time"] {
+            width: auto;
+            padding: 3px 6px;
+            font-size: 0.82em;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            background-color: #ffffff;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 5px 8px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            box-sizing: border-box;
+            height: 42px;
+            resize: vertical;
+        }
+
+        .signature-section {
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+            margin-top: 8px;
+        }
+
+        .signature-area {
+            text-align: center;
+            flex: 1;
+            max-width: 340px;
+        }
+
+        .signature-container {
+            border: 1px dashed #cbd5e1;
+            padding: 4px;
+            border-radius: 6px;
+            min-height: 70px;
+            height: 75px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 6px;
+            background-color: #f8fafc;
+        }
+
+        .signature-container img {
+            max-width: 100%;
+            max-height: 65px;
+            object-fit: contain;
+        }
+
+        .signature-button {
+            background-color: #2563eb;
+            color: white;
+            padding: 8px 14px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .signature-button:hover {
+            background-color: #1e40af;
+        }
+
+        .signature-area label {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .form-actions button[type="submit"] {
+            background-color: #22c55e;
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.05em;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(34, 197, 94, 0.3);
+            transition: background-color 0.2s;
+        }
+
+        .form-actions button[type="submit"]:hover {
+            background-color: #16a34a;
+        }
+
+        .form-actions .print-button {
+            background-color: #2563eb;
+            color: white;
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.05em;
+            font-weight: 600;
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+            transition: background-color 0.2s;
+        }
+
+        .form-actions .print-button:hover {
+            background-color: #1d4ed8;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(2px);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 6% auto;
+            padding: 24px;
+            border: 1px solid #e2e8f0;
+            width: 90%;
+            max-width: 550px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        .close-button {
+            color: #64748b;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close-button:hover {
+            color: #0f172a;
+        }
+
+        canvas {
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            width: 100%;
+            height: 220px;
+            background-color: #fcfcfc;
+            touch-action: none;
+            cursor: crosshair;
+        }
+
+        .signature-guideline {
+            font-size: 0.78em;
+            color: #94a3b8;
+            text-align: center;
+            margin-top: 6px;
+        }
+
+        .signature-status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            font-size: 0.8em;
+            border-radius: 12px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        .signature-status-badge.pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+
+        .signature-status-badge.signed {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+
+        .modal-actions {
+            margin-top: 18px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .modal-actions button {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .clear-button {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        .clear-button:hover {
+            background-color: #dc2626;
+        }
+
+        .save-button {
+            background-color: #2563eb;
+            color: white;
+        }
+
+        .save-button:hover {
+            background-color: #1d4ed8;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            border-top-color: #38bdf8;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Configuración de Impresión: Sin Encabezado/Pie de página del navegador y exactamente 1 página por CAST */
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
+
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            html, body {
+                width: 100% !important;
+                height: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: #ffffff !important;
+                overflow: hidden !important;
+            }
+
+            .form-actions,
+            .signature-button,
+            .signature-status-badge,
+            .modal,
+            .loading-overlay,
+            #pdf-loading-overlay,
+            .no-print {
+                display: none !important;
+            }
+
+            .form-container {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+                padding: 5mm 8mm !important;
+                box-shadow: none !important;
+                border: none !important;
+                border-radius: 0 !important;
+                background: #ffffff !important;
+                box-sizing: border-box !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                page-break-after: avoid !important;
+                break-after: avoid !important;
+            }
+
+            .form-header {
+                margin-bottom: 4px !important;
+                padding-bottom: 3px !important;
+            }
+
+            .form-section {
+                margin-bottom: 4px !important;
+                padding: 4px 6px !important;
+                border: 1px solid #cbd5e1 !important;
+                border-radius: 4px !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            .form-section h3 {
+                margin: 1px 0 3px 0 !important;
+                font-size: 0.88em !important;
+            }
+
+            label {
+                font-size: 0.78em !important;
+                margin-bottom: 1px !important;
+            }
+
+            input[type="text"],
+            input[type="date"],
+            input[type="time"],
+            textarea {
+                font-size: 0.78em !important;
+                padding: 2px 4px !important;
+                border: 1px solid #94a3b8 !important;
+                border-radius: 3px !important;
+                background-color: #ffffff !important;
+            }
+
+            textarea {
+                resize: none !important;
+                height: 30px !important;
+            }
+
+            .signature-container {
+                min-height: 50px !important;
+                height: 55px !important;
+                border: 1px dashed #94a3b8 !important;
+            }
+
+            .signature-container img {
+                max-height: 48px !important;
+            }
+
+            .signature-section {
+                margin-top: 4px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <form id="tech-service-form">
+            <header class="form-header">
+                <div class="header-top">
+                    <div class="header-logo-container">
+                        <img src="logo.jpg" alt="CNS Logo">
+                    </div>
+                </div>
+                <div class="header-bottom">
+                    <div class="form-title">
+                        <div class="contact-info">
+                            <p>Calle Francisco Masías N°2532 Lince - Lima - Perú</p>
+                            <p>Central: 4222100 - 2024444</p>
+                            <p>www.cns.com.pe</p>
+                            <p>E-mail: servicios@cns.com.pe</p>
+                        </div>
+                        <h2>CONSTANCIA DE ATENCIÓN SERVICIO TÉCNICO <span id="correlativo-display" class="correlativo-number" title="Haga clic para editar el número correlativo">N°: 0000001</span></h2>
+                        <input type="hidden" id="correlativo-input" name="correlativo" value="1">
+                    </div>
+                    <div class="form-number-date">
+                        <div class="date-field">
+                            <label for="fecha">Fecha:</label>
+                            <input type="date" id="fecha" name="fecha">
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="form-section">
+                <div class="grid-container">
+                    <div class="grid-item">
+                        <label for="cliente">Cliente:</label>
+                        <input type="text" id="cliente" name="cliente">
+                    </div>
+                    <div class="grid-item">
+                        <label for="ticket-number">Número de Ticket:</label>
+                        <input type="text" id="ticket-number" name="ticket-number">
+                    </div>
+                    <div class="grid-item">
+                        <label for="usuario">Usuario:</label>
+                        <input type="text" id="usuario" name="usuario">
+                    </div>
+                    <div class="grid-item">
+                        <label for="area">Área:</label>
+                        <input type="text" id="area" name="area">
+                    </div>
+                    <div class="grid-item">
+                        <label for="direccion">Dirección:</label>
+                        <input type="text" id="direccion" name="direccion">
+                    </div>
+                    <div class="grid-item">
+                        <label for="telefono">Teléfono:</label>
+                        <input type="text" id="telefono" name="telefono">
+                    </div>
+                    <div class="grid-item">
+                        <label for="distrito">Distrito:</label>
+                        <input type="text" id="distrito" name="distrito">
+                    </div>
+                    <div class="grid-item">
+                        <label for="celular">Celular:</label>
+                        <input type="text" id="celular" name="celular">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>Equipo</h3>
+                <div class="checkbox-group">
+                    <label><input type="checkbox" name="equipo" value="desktop"> Desktop</label>
+                    <label><input type="checkbox" name="equipo" value="portatil"> Portátil</label>
+                    <label><input type="checkbox" name="equipo" value="server"> Server</label>
+                    <label><input type="checkbox" name="equipo" value="impresora"> Impresora</label>
+                    <label><input type="checkbox" name="equipo" value="switch"> Switch</label>
+                    <label><input type="checkbox" name="equipo" value="ups"> UPS</label>
+                    <label><input type="checkbox" name="equipo" value="camara"> Cámara</label>
+                    <label><input type="checkbox" name="equipo" value="otros"> Otros</label>
+                </div>
+                <div class="grid-container">
+                    <div class="grid-item">
+                        <label for="marca">Marca:</label>
+                        <input type="text" id="marca" name="marca">
+                    </div>
+                    <div class="grid-item">
+                        <label for="modelo">Modelo:</label>
+                        <input type="text" id="modelo" name="modelo">
+                    </div>
+                    <div class="grid-item">
+                        <label for="serie">Serie:</label>
+                        <input type="text" id="serie" name="serie">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <div class="checkbox-group single-line">
+                    <label><input type="checkbox" name="tipo_servicio" value="contrato"> Contrato</label>
+                    <label><input type="checkbox" name="tipo_servicio" value="garantia"> Garantía de marca</label>
+                    <label><input type="checkbox" name="tipo_servicio" value="requerimiento"> Requerimiento</label>
+                    <label><input type="checkbox" name="tipo_servicio" value="mantenimiento"> Mantenimiento Preventivo</label>
+                    <label><input type="checkbox" name="tipo_servicio" value="incidencia"> Incidencia</label>
+                    <label><input type="checkbox" name="tipo_servicio" value="otros"> Otros</label>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <label for="falla-usuario">Falla o Problema reportado por usuario:</label>
+                <textarea id="falla-usuario" name="falla-usuario" rows="2"></textarea>
+
+                <label for="falla-real">Falla o Problema real:</label>
+                <textarea id="falla-real" name="falla-real" rows="2"></textarea>
+
+                <label for="actividad-realizada">Actividad realizada:</label>
+                <textarea id="actividad-realizada" name="actividad-realizada" rows="2"></textarea>
+            </div>
+
+            <div class="form-section">
+                <div class="parts-header">
+                    <h3>Utilización de Partes</h3>
+                    <div class="radio-inline">
+                        <label><input type="radio" name="utilizacion-partes" value="si"> Si</label>
+                        <label><input type="radio" name="utilizacion-partes" value="no"> No</label>
+                    </div>
+                </div>
+                <div class="parts-grid-tripled">
+                    <div class="parts-col-header">
+                        <span>Cant.</span><span>Código/Descripción</span>
+                    </div>
+                    <div class="parts-col-header">
+                        <span>Cant.</span><span>Código/Descripción</span>
+                    </div>
+                    <div class="parts-col-header">
+                        <span>Cant.</span><span>Código/Descripción</span>
+                    </div>
+
+                    <div class="parts-pair"><input type="text" name="parte-cant-1"><input type="text" name="parte-desc-1"></div>
+                    <div class="parts-pair"><input type="text" name="parte-cant-2"><input type="text" name="parte-desc-2"></div>
+                    <div class="parts-pair"><input type="text" name="parte-cant-3"><input type="text" name="parte-desc-3"></div>
+
+                    <div class="parts-pair"><input type="text" name="parte-cant-4"><input type="text" name="parte-desc-4"></div>
+                    <div class="parts-pair"><input type="text" name="parte-cant-5"><input type="text" name="parte-desc-5"></div>
+                    <div class="parts-pair"><input type="text" name="parte-cant-6"><input type="text" name="parte-desc-6"></div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <label for="estado-equipo">Estado del Equipo:</label>
+                <textarea id="estado-equipo" name="estado-equipo" rows="1"></textarea>
+                <label for="observaciones">Observaciones/Recomendación:</label>
+                <textarea id="observaciones" name="observaciones" rows="1"></textarea>
+                <label for="observaciones-cliente">Observaciones del cliente:</label>
+                <textarea id="observaciones-cliente" name="observaciones-cliente" rows="1"></textarea>
+            </div>
+
+            <div class="form-section">
+                 <h3>Satisfacción General con el servicio Técnico</h3>
+                 <div class="satisfaction-group">
+                    <label>1 <input type="radio" name="satisfaccion" value="1"></label>
+                    <label>2 <input type="radio" name="satisfaccion" value="2"></label>
+                    <label>3 <input type="radio" name="satisfaccion" value="3"></label>
+                    <label>4 <input type="radio" name="satisfaccion" value="4"></label>
+                    <label>5 <input type="radio" name="satisfaccion" value="5"></label>
+                 </div>
+                 <div class="time-inputs-single-line">
+                    <div class="time-field-item">
+                        <label for="h_ll_c" title="Hora de Llegada al Cliente">H.LL.C:</label>
+                        <input type="time" id="h_ll_c" name="h_ll_c">
+                    </div>
+                    <div class="time-field-item">
+                        <label for="h_i_s" title="Hora de Inicio del Servicio">H.I.S:</label>
+                        <input type="time" id="h_i_s" name="h_i_s">
+                    </div>
+                    <div class="time-field-item">
+                        <label for="h_f_s" title="Hora de Fin de Servicio">H.F.S:</label>
+                        <input type="time" id="h_f_s" name="h_f_s">
+                    </div>
+                    <div class="time-field-item">
+                        <label for="h_s_c" title="Hora de Salida del Cliente">H.S.C:</label>
+                        <input type="time" id="h_s_c" name="h_s_c">
+                    </div>
+                 </div>
+            </div>
+
+            <div class="form-section signature-section">
+                <div class="signature-area">
+                    <div class="signature-container">
+                        <img id="sig-repc-img" src="" alt="Firma Rep. Tec." style="display: none;">
+                        <button type="button" class="signature-button" data-target="sig-repc-modal" id="sig-repc-btn">✍️ Firmar Rep. Técnico</button>
+                    </div>
+                    <span id="sig-repc-badge" class="signature-status-badge pending">Pendiente</span>
+                    <label for="rep-tecnico-nombre">Rep. Tec:</label>
+                    <input type="text" id="rep-tecnico-nombre" name="rep-tecnico-nombre">
+                </div>
+                <div class="signature-area">
+                     <div class="signature-container">
+                        <img id="sig-user-img" src="" alt="Firma Usuario" style="display: none;">
+                        <button type="button" class="signature-button" data-target="sig-user-modal" id="sig-user-btn">✍️ Firmar Cliente / Usuario</button>
+                    </div>
+                    <span id="sig-user-badge" class="signature-status-badge pending">Pendiente</span>
+                    <label for="usuario-nombre">Usuario:</label>
+                    <input type="text" id="usuario-nombre" name="usuario-nombre">
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit">📄 Generar y Descargar PDF</button>
+                <button type="button" onclick="window.print()" class="print-button">🖨️ Imprimir Constancia</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Modals de Firma -->
+    <div id="sig-repc-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" data-target="sig-repc-modal">&times;</span>
+            <h2>Firma Representante Técnico</h2>
+            <canvas id="sig-repc-canvas"></canvas>
+            <p class="signature-guideline">Dibuje su firma en el recuadro utilizando el mouse o el dedo.</p>
+            <div class="modal-actions">
+                <button type="button" class="clear-button" data-target="sig-repc-canvas">🗑️ Limpiar</button>
+                <button type="button" class="save-button" data-target-canvas="sig-repc-canvas" data-target-img="sig-repc-img" data-target-modal="sig-repc-modal" data-badge="sig-repc-badge" data-btn="sig-repc-btn">💾 Guardar Firma</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="sig-user-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" data-target="sig-user-modal">&times;</span>
+            <h2>Firma Usuario / Cliente</h2>
+            <canvas id="sig-user-canvas"></canvas>
+            <p class="signature-guideline">Dibuje su firma en el recuadro utilizando el mouse o el dedo.</p>
+            <div class="modal-actions">
+                <button type="button" class="clear-button" data-target="sig-user-canvas">🗑️ Limpiar</button>
+                <button type="button" class="save-button" data-target-canvas="sig-user-canvas" data-target-img="sig-user-img" data-target-modal="sig-user-modal" data-badge="sig-user-badge" data-btn="sig-user-btn">💾 Guardar Firma</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="pdf-loading-overlay" class="loading-overlay" style="display: none;">
+        <div class="loading-spinner"></div>
+        <p>Generando documento PDF, por favor espere...</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const signatureButtons = document.querySelectorAll('.signature-button');
+            const closeButtons = document.querySelectorAll('.close-button');
+            const clearButtons = document.querySelectorAll('.clear-button');
+            const saveButtons = document.querySelectorAll('.save-button');
+            const form = document.getElementById('tech-service-form');
+            const pdfLoadingOverlay = document.getElementById('pdf-loading-overlay');
+
+            let activeCanvas = null;
+            let isDrawing = false;
+            let lastX = 0;
+            let lastY = 0;
+            const canvasHasDrawnMap = new Map();
+
+            const fechaInput = document.getElementById('fecha');
+            if (fechaInput && !fechaInput.value) {
+                fechaInput.value = new Date().toISOString().split('T')[0];
+            }
+
+            const correlativoDisplay = document.getElementById('correlativo-display');
+            const correlativoInput = document.getElementById('correlativo-input');
+
+            let currentCorrelativo = parseInt(localStorage.getItem('cast_correlativo_num') || '1', 10);
+
+            function formatCorrelativo(num) {
+                return 'N°: ' + String(num).padStart(7, '0');
+            }
+
+            function updateCorrelativoUI(num) {
+                currentCorrelativo = num;
+                localStorage.setItem('cast_correlativo_num', num);
+                if (correlativoDisplay) correlativoDisplay.textContent = formatCorrelativo(num);
+                if (correlativoInput) correlativoInput.value = num;
+            }
+
+            updateCorrelativoUI(currentCorrelativo);
+
+            if (correlativoDisplay) {
+                correlativoDisplay.addEventListener('click', () => {
+                    const nuevoVal = prompt('Ajustar número correlativo actual:', currentCorrelativo);
+                    if (nuevoVal !== null) {
+                        const parsed = parseInt(nuevoVal, 10);
+                        if (!isNaN(parsed) && parsed > 0) {
+                            updateCorrelativoUI(parsed);
+                        } else {
+                            alert('Por favor ingrese un número entero válido mayor a 0.');
+                        }
+                    }
+                });
+            }
+
+            signatureButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const modalId = button.dataset.target;
+                    const modal = document.getElementById(modalId);
+                    modal.style.display = 'block';
+                    activeCanvas = modal.querySelector('canvas');
+                    setupCanvas(activeCanvas);
+                });
+            });
+
+            closeButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const modalId = button.dataset.target;
+                    const modal = document.getElementById(modalId);
+                    modal.style.display = 'none';
+                });
+            });
+
+            window.addEventListener('click', (e) => {
+                if (e.target.classList.contains('modal')) {
+                    e.target.style.display = 'none';
+                }
+            });
+
+            clearButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const canvasId = button.dataset.target;
+                    const canvas = document.getElementById(canvasId);
+                    clearCanvas(canvas);
+                });
+            });
+
+            saveButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const canvas = document.getElementById(button.dataset.targetCanvas);
+                    const img = document.getElementById(button.dataset.targetImg);
+                    const modal = document.getElementById(button.dataset.targetModal);
+                    const badge = document.getElementById(button.dataset.badge);
+                    const btn = document.getElementById(button.dataset.btn);
+
+                    if (isCanvasBlank(canvas)) {
+                        alert('Por favor, ingrese su firma antes de guardar.');
+                        return;
+                    }
+
+                    img.src = canvas.toDataURL('image/png');
+                    img.style.display = 'block';
+                    modal.style.display = 'none';
+
+                    if (badge) {
+                        badge.textContent = 'Firmado ✔';
+                        badge.classList.remove('pending');
+                        badge.classList.add('signed');
+                    }
+
+                    if (btn) {
+                        btn.textContent = '✏️ Modificar Firma';
+                    }
+                });
+            });
+
+            function setupCanvas(canvas) {
+                if (!canvas) return;
+                const rect = canvas.getBoundingClientRect();
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = canvas.width;
+                tempCanvas.height = canvas.height;
+                const tempCtx = tempCanvas.getContext('2d');
+                if (canvas.width > 0 && canvas.height > 0) {
+                    tempCtx.drawImage(canvas, 0, 0);
+                }
+
+                canvas.width = rect.width * ratio;
+                canvas.height = rect.height * ratio;
+                const ctx = canvas.getContext('2d');
+                ctx.scale(ratio, ratio);
+
+                if (tempCanvas.width > 0 && tempCanvas.height > 0 && canvasHasDrawnMap.get(canvas.id)) {
+                    ctx.drawImage(tempCanvas, 0, 0, rect.width, rect.height);
+                } else {
+                    ctx.fillStyle = '#fcfcfc';
+                    ctx.fillRect(0, 0, rect.width, rect.height);
+                    drawGuideline(canvas, ctx, rect.width, rect.height);
+                }
+            }
+
+            function drawGuideline(canvas, ctx, width, height) {
+                ctx.save();
+                ctx.strokeStyle = '#e2e8f0';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([6, 4]);
+                ctx.beginPath();
+                ctx.moveTo(20, height - 35);
+                ctx.lineTo(width - 20, height - 35);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            function clearCanvas(canvas) {
+                if (!canvas) return;
+                const ctx = canvas.getContext('2d');
+                const ratio = Math.max(window.devicePixelRatio || 1, 1);
+                const width = canvas.width / ratio;
+                const height = canvas.height / ratio;
+
+                ctx.clearRect(0, 0, width, height);
+                ctx.fillStyle = '#fcfcfc';
+                ctx.fillRect(0, 0, width, height);
+                drawGuideline(canvas, ctx, width, height);
+                canvasHasDrawnMap.set(canvas.id, false);
+            }
+
+            function isCanvasBlank(canvas) {
+                return !canvasHasDrawnMap.get(canvas.id);
+            }
+
+            function getCoordinates(e, canvas) {
+                const rect = canvas.getBoundingClientRect();
+                let clientX = e.clientX;
+                let clientY = e.clientY;
+
+                if (e.touches && e.touches.length > 0) {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                }
+
+                return {
+                    x: clientX - rect.left,
+                    y: clientY - rect.top
+                };
+            }
+
+            function startDrawing(e) {
+                if (!activeCanvas) return;
+                e.preventDefault();
+                isDrawing = true;
+                const pos = getCoordinates(e, activeCanvas);
+                lastX = pos.x;
+                lastY = pos.y;
+
+                const ctx = activeCanvas.getContext('2d');
+                ctx.beginPath();
+                ctx.moveTo(lastX, lastY);
+                canvasHasDrawnMap.set(activeCanvas.id, true);
+            }
+
+            function draw(e) {
+                if (!isDrawing || !activeCanvas) return;
+                e.preventDefault();
+                const pos = getCoordinates(e, activeCanvas);
+                const ctx = activeCanvas.getContext('2d');
+
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.strokeStyle = '#0f172a';
+
+                const midX = (lastX + pos.x) / 2;
+                const midY = (lastY + pos.y) / 2;
+
+                ctx.quadraticCurveTo(lastX, lastY, midX, midY);
+                ctx.stroke();
+
+                lastX = pos.x;
+                lastY = pos.y;
+            }
+
+            function stopDrawing(e) {
+                if (isDrawing) {
+                    isDrawing = false;
+                }
+            }
+
+            document.querySelectorAll('canvas').forEach(canvas => {
+                canvas.addEventListener('mousedown', startDrawing);
+                canvas.addEventListener('mousemove', draw);
+                canvas.addEventListener('mouseup', stopDrawing);
+                canvas.addEventListener('mouseleave', stopDrawing);
+
+                canvas.addEventListener('touchstart', startDrawing, { passive: false });
+                canvas.addEventListener('touchmove', draw, { passive: false });
+                canvas.addEventListener('touchend', stopDrawing, { passive: false });
+            });
+
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                if (pdfLoadingOverlay) {
+                    pdfLoadingOverlay.style.display = 'flex';
+                }
+
+                const elementsToHide = document.querySelectorAll('.signature-button, .modal, .form-actions');
+                elementsToHide.forEach(el => el.style.visibility = 'hidden');
+
+                const formContainer = document.querySelector('.form-container');
+
+                html2canvas(formContainer, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    windowWidth: 1024,
+                    onclone: (clonedDoc) => {
+                        const clonedForm = clonedDoc.querySelector('#tech-service-form');
+                        if (!clonedForm) return;
+
+                        const originalInputs = form.querySelectorAll('input, textarea, select');
+                        originalInputs.forEach(input => {
+                            if (input.name) {
+                                if (input.type === 'radio' || input.type === 'checkbox') {
+                                    const clonedInput = clonedForm.querySelector(`[name="${CSS.escape(input.name)}"][value="${CSS.escape(input.value)}"]`);
+                                    if (clonedInput) {
+                                        clonedInput.checked = input.checked;
+                                        if (input.checked) {
+                                            clonedInput.setAttribute('checked', 'checked');
+                                        } else {
+                                            clonedInput.removeAttribute('checked');
+                                        }
+                                    }
+                                } else {
+                                    const clonedInput = clonedForm.querySelector(`[name="${CSS.escape(input.name)}"]`);
+                                    if (clonedInput) {
+                                        const val = input.value || '';
+                                        const isTextarea = input.tagName.toLowerCase() === 'textarea';
+                                        
+                                        const textDiv = clonedDoc.createElement('div');
+                                        textDiv.style.width = '100%';
+                                        textDiv.style.minHeight = isTextarea ? '28px' : '20px';
+                                        textDiv.style.maxHeight = 'none';
+                                        textDiv.style.border = '1px solid #cbd5e1';
+                                        textDiv.style.borderRadius = '4px';
+                                        textDiv.style.padding = '2px 5px';
+                                        textDiv.style.fontSize = '11px';
+                                        textDiv.style.lineHeight = '1.3';
+                                        textDiv.style.color = '#0f172a';
+                                        textDiv.style.backgroundColor = '#ffffff';
+                                        textDiv.style.boxSizing = 'border-box';
+                                        textDiv.style.whiteSpace = isTextarea ? 'pre-wrap' : 'nowrap';
+                                        textDiv.style.wordBreak = 'break-word';
+                                        textDiv.style.overflow = 'visible';
+                                        textDiv.textContent = val;
+
+                                        clonedInput.parentNode.replaceChild(textDiv, clonedInput);
+                                    }
+                                }
+                            }
+                        });
+
+                        clonedDoc.querySelectorAll('.signature-button, .form-actions').forEach(el => {
+                            el.style.display = 'none';
+                        });
+                    }
+                }).then(canvas => {
+                    const { jsPDF } = window.jspdf;
+                    const imgData = canvas.toDataURL('image/png');
+
+                    const pdf = new jsPDF({
+                        orientation: 'portrait',
+                        unit: 'mm',
+                        format: 'a4'
+                    });
+
+                    const pdfWidth = pdf.internal.pageSize.getWidth();
+                    const pdfHeight = pdf.internal.pageSize.getHeight();
+                    const margin = 4;
+
+                    const availableWidth = pdfWidth - (margin * 2);
+                    const availableHeight = pdfHeight - (margin * 2);
+
+                    const imgProps = pdf.getImageProperties(imgData);
+
+                    const scaleX = availableWidth / imgProps.width;
+                    const scaleY = availableHeight / imgProps.height;
+                    const scale = Math.min(scaleX, scaleY);
+
+                    const finalWidth = imgProps.width * scale;
+                    const finalHeight = imgProps.height * scale;
+
+                    const xPos = (pdfWidth - finalWidth) / 2;
+                    const yPos = (pdfHeight - finalHeight) / 2;
+
+                    pdf.addImage(imgData, 'PNG', xPos, yPos, finalWidth, finalHeight);
+
+                    const numPadded = String(currentCorrelativo).padStart(7, '0');
+                    pdf.save(`CAST${numPadded}.pdf`);
+
+                    updateCorrelativoUI(currentCorrelativo + 1);
+
+                    elementsToHide.forEach(el => el.style.visibility = 'visible');
+                    if (pdfLoadingOverlay) {
+                        pdfLoadingOverlay.style.display = 'none';
+                    }
+                }).catch(err => {
+                    console.error('Error generando PDF:', err);
+                    alert('Ocurrió un error al generar el documento PDF.');
+                    elementsToHide.forEach(el => el.style.visibility = 'visible');
+                    if (pdfLoadingOverlay) {
+                        pdfLoadingOverlay.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
