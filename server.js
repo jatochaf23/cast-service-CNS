@@ -528,13 +528,19 @@ app.put('/api/tickets/:id/completar', async (req, res) => {
     }
 });
 
-// Inicializar base de datos y arrancar servidor
-initDB().then(() => {
-    app.listen(PORT, '0.0.0.0', () => {
-        console.log(`🚀 Servidor CAST Service corriendo en:`);
-        console.log(`   👉 Local:   http://localhost:${PORT}`);
-        console.log(`   👉 Red LAN: http://172.20.10.2:${PORT}`);
+// Inicializar base de datos y arrancar servidor localmente
+if (!process.env.VERCEL) {
+    initDB().then(() => {
+        app.listen(PORT, '0.0.0.0', () => {
+            console.log(`🚀 Servidor CAST Service corriendo en:`);
+            console.log(`   👉 Local:   http://localhost:${PORT}`);
+            console.log(`   👉 Red LAN: http://172.20.10.2:${PORT}`);
+        });
+    }).catch(err => {
+        console.error('Error crítico al iniciar:', err);
     });
-}).catch(err => {
-    console.error('Error crítico al iniciar:', err);
-});
+} else {
+    initDB();
+}
+
+module.exports = app;
