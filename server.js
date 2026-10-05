@@ -272,7 +272,7 @@ app.get('/api/tickets/:id', async (req, res) => {
             `SELECT t.*, u.nombre as nombre_tecnico, u.correo as correo_tecnico
              FROM ticket t
              LEFT JOIN usuarios u ON t.id_usuario_asignado = u.id_usuario
-             WHERE t.id_ticket = ? OR LOWER(TRIM(t.numero_ticket)) = LOWER(TRIM(?))`,
+             WHERE CAST(t.id_ticket AS TEXT) = ? OR LOWER(TRIM(t.numero_ticket)) = LOWER(TRIM(?))`,
             [ticketIdOrNumber, ticketIdOrNumber]
         );
 
@@ -494,7 +494,7 @@ app.put('/api/tickets/:id/completar', async (req, res) => {
         } = req.body;
 
         const [rows] = await pool.query(
-            'SELECT * FROM ticket WHERE id_ticket = ? OR LOWER(TRIM(numero_ticket)) = LOWER(TRIM(?))',
+            'SELECT * FROM ticket WHERE CAST(id_ticket AS TEXT) = ? OR LOWER(TRIM(numero_ticket)) = LOWER(TRIM(?))',
             [ticketIdOrNumber, ticketIdOrNumber]
         );
         if (rows.length === 0) {
