@@ -65,6 +65,10 @@
                     <p class="text-sm text-slate-500">Asigne constancias técnicas con número de ticket específico a cada técnico.</p>
                 </div>
                 <div class="flex items-center gap-2">
+                    <button id="btn-new-ticket" onclick="openNewTicketModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-[#1e3a8a] hover:bg-[#172554] text-white font-semibold text-sm rounded-xl border border-[#2d52a8] shadow-sm transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                        <span>Nuevo Ticket</span>
+                    </button>
                     <button id="btn-manage-users" onclick="openUsersModal()" class="hidden inline-flex items-center gap-1.5 px-3 py-2.5 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-xl border border-slate-300 transition-all">
                         <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
                         <span>Usuarios / Personal</span>
@@ -301,6 +305,122 @@
                     </tbody>
                 </table>
             </div>
+        </div>
+    </div>
+
+    <!-- MODAL: REGISTRAR NUEVO TICKET (ADMINISTRADOR Y DISPATCHER) -->
+    <div id="new-ticket-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl border border-slate-100 max-h-[92vh] flex flex-col">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-[#1e3a8a]">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 leading-tight">Registrar Nuevo Ticket</h3>
+                        <p class="text-xs text-slate-500">Se guardará directamente en la base de datos</p>
+                    </div>
+                </div>
+                <button onclick="closeNewTicketModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <form id="new-ticket-form" onsubmit="submitNewTicket(event)" class="overflow-y-auto flex-1 pr-1 space-y-4 text-xs">
+                <!-- Datos del ticket -->
+                <div>
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-[#1e3a8a] mb-2">Datos del Ticket</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">N° de Ticket <span class="text-red-500">*</span></label>
+                            <input type="text" id="nt-numero" required placeholder="TCK-2026-001" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Formato CAST</label>
+                            <select id="nt-formato" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="Multimarca">Multimarca</option>
+                                <option value="Lexmark">Lexmark</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Técnico (opcional)</label>
+                            <select id="nt-tecnico" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">-- Sin asignar --</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cliente -->
+                <div>
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-[#1e3a8a] mb-2">Datos del Cliente</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Cliente / Empresa <span class="text-red-500">*</span></label>
+                            <input type="text" id="nt-cliente" required placeholder="Razón social" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Usuario / Contacto <span class="text-red-500">*</span></label>
+                            <input type="text" id="nt-usuario" required placeholder="Nombre del usuario" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Teléfono</label>
+                            <input type="text" id="nt-telefono" placeholder="999 999 999" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Distrito</label>
+                            <input type="text" id="nt-distrito" placeholder="Distrito" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div class="sm:col-span-2">
+                            <label class="block font-bold text-slate-600 mb-1">Dirección</label>
+                            <input type="text" id="nt-direccion" placeholder="Dirección de atención" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Equipo -->
+                <div>
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-[#1e3a8a] mb-2">Datos del Equipo</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Marca</label>
+                            <input type="text" id="nt-marca" placeholder="Lexmark, HP, Lenovo..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Modelo</label>
+                            <input type="text" id="nt-modelo" placeholder="Modelo" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Serie</label>
+                            <input type="text" id="nt-serie" placeholder="N° de serie" class="w-full px-3 py-2 border border-slate-300 rounded-lg font-mono focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detalle -->
+                <div>
+                    <p class="text-[11px] font-bold uppercase tracking-wider text-[#1e3a8a] mb-2">Detalle de la Atención</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Requerimiento</label>
+                            <textarea id="nt-requerimiento" rows="3" placeholder="Tipo de servicio solicitado" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Incidencia reportada</label>
+                            <textarea id="nt-incidencia" rows="3" placeholder="Falla reportada por el usuario" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeNewTicketModal()" class="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" id="nt-btn-submit" class="px-4 py-2 bg-[#1e3a8a] hover:bg-[#172554] text-white text-xs font-bold rounded-xl transition-colors shadow-sm">
+                        Guardar Ticket
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -930,6 +1050,87 @@
             } catch (err) {
                 console.error(err);
                 showToast('Error de red al crear usuario', true);
+            }
+        }
+
+        // Registro manual de tickets (Administrador y Dispatcher)
+        function openNewTicketModal() {
+            document.getElementById('new-ticket-form').reset();
+            const sel = document.getElementById('nt-tecnico');
+            sel.innerHTML = '<option value="">-- Sin asignar --</option>' +
+                (allTecnicos || []).map(t => `<option value="${t.id_usuario}">${t.nombre}</option>`).join('');
+            document.getElementById('new-ticket-modal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('nt-numero').focus(), 50);
+        }
+
+        function closeNewTicketModal() {
+            document.getElementById('new-ticket-modal').classList.add('hidden');
+        }
+
+        async function submitNewTicket(e) {
+            e.preventDefault();
+            const val = id => document.getElementById(id).value.trim();
+            const tecnicoId = val('nt-tecnico');
+
+            const payload = {
+                numero_ticket: val('nt-numero'),
+                tipo_formato: val('nt-formato'),
+                id_usuario_asignado: tecnicoId || null,
+                cliente: val('nt-cliente'),
+                usuario: val('nt-usuario'),
+                telefono: val('nt-telefono'),
+                distrito: val('nt-distrito'),
+                direccion: val('nt-direccion'),
+                marca: val('nt-marca'),
+                modelo: val('nt-modelo'),
+                serie: val('nt-serie'),
+                requerimiento: val('nt-requerimiento'),
+                incidencia: val('nt-incidencia')
+            };
+
+            const btn = document.getElementById('nt-btn-submit');
+            btn.disabled = true;
+            btn.textContent = 'Guardando...';
+
+            try {
+                const token = localStorage.getItem('cast_token');
+                const res = await fetch(`${API_BASE}/api/tickets`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (!data.success) {
+                    showToast(data.message || 'Error al registrar el ticket.', true);
+                    return;
+                }
+
+                // Si se eligió técnico, asignarlo (pasa a 'En Proceso')
+                if (tecnicoId && data.id_ticket) {
+                    await fetch(`${API_BASE}/api/tickets/${data.id_ticket}/asignar`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ id_usuario_asignado: tecnicoId, tipo_formato: payload.tipo_formato })
+                    });
+                }
+
+                showToast(`Ticket '${payload.numero_ticket}' registrado correctamente.`);
+                closeNewTicketModal();
+                loadTickets();
+                loadTecnicos();
+            } catch (err) {
+                console.error(err);
+                showToast('Error de conexión al registrar el ticket.', true);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Guardar Ticket';
             }
         }
 

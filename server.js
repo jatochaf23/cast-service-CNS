@@ -301,7 +301,7 @@ app.post('/api/tickets/asignar-por-numero', authMiddleware, requireRoles(1, 2), 
 
         // Buscar técnico
         const [tecnicos] = await pool.query(
-            'SELECT id_usuario, nombre FROM usuarios WHERE id_usuario = ? AND id_rol = 3 AND estado = "Activo"',
+            `SELECT id_usuario, nombre FROM usuarios WHERE id_usuario = ? AND id_rol = 3 AND estado = 'Activo'`,
             [id_usuario_asignado]
         );
         if (tecnicos.length === 0) {
@@ -439,7 +439,7 @@ app.put('/api/tickets/:id/asignar', authMiddleware, requireRoles(1, 2), async (r
 
         // Verificar que el usuario asignado sea técnico activo
         const [tecnico] = await pool.query(
-            'SELECT id_usuario, nombre FROM usuarios WHERE id_usuario = ? AND id_rol = 3 AND estado = "Activo"',
+            `SELECT id_usuario, nombre FROM usuarios WHERE id_usuario = ? AND id_rol = 3 AND estado = 'Activo'`,
             [id_usuario_asignado]
         );
         if (tecnico.length === 0) {
