@@ -12,11 +12,17 @@
 </head>
 <body class="bg-[#0b172a] min-h-screen flex items-center justify-center p-4 selection:bg-[#1e3a8a] selection:text-white">
 
-    <div class="max-w-md w-full">
+    <div class="max-w-md sm:max-w-lg w-full">
         <!-- Logo & Header -->
-        <div class="text-center mb-8">
-            <div class="inline-flex items-center justify-center bg-white p-3 rounded-2xl shadow-md border border-blue-950/20 mb-4">
-                <img src="logo.jpg" alt="CNS Logo" class="h-10 object-contain">
+        <div class="text-center mb-6">
+            <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-xl border border-white/20 mb-4 flex flex-col gap-3.5">
+                <div class="flex items-center justify-center">
+                    <img src="logo.png" alt="CNS Multimarca" class="h-14 sm:h-16 w-full object-contain">
+                </div>
+                <div class="border-t border-slate-200/80"></div>
+                <div class="flex items-center justify-center">
+                    <img src="cast_lexmark_logo.jpg" alt="CAST Lexmark" class="h-12 sm:h-14 w-full object-contain">
+                </div>
             </div>
             <h1 class="text-2xl font-bold text-white tracking-tight">Sistema CAST CNS</h1>
             <p class="text-xs text-blue-200/70 mt-1 uppercase tracking-wider font-semibold">Portal de Atención y Constancias de Servicio Técnico</p>
@@ -64,28 +70,6 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                 </button>
             </form>
-
-            <!-- Acceso Rápido / Credenciales de Prueba -->
-            <div class="mt-6 pt-5 border-t border-slate-100">
-                <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">Acceso Rápido de Prueba:</p>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
-                    <button type="button" onclick="fillTest('oricra@cns.com.pe', 'tecnico123')" 
-                        class="p-2.5 bg-slate-50 hover:bg-blue-50/60 text-slate-800 rounded-xl text-left border border-slate-200 hover:border-blue-300 transition-colors flex items-center justify-between sm:block">
-                        <span class="block font-bold text-slate-700">Técnico</span>
-                        <span class="text-[10px] text-blue-900/70 font-medium">Omar Ricra</span>
-                    </button>
-                    <button type="button" onclick="fillTest('dispatcher@cns.com.pe', 'dispa123')" 
-                        class="p-2.5 bg-slate-50 hover:bg-blue-50/60 text-slate-800 rounded-xl text-left border border-slate-200 hover:border-blue-300 transition-colors flex items-center justify-between sm:block">
-                        <span class="block font-bold text-slate-700">Dispatcher</span>
-                        <span class="text-[10px] text-blue-900/70 font-medium">Coordinación</span>
-                    </button>
-                    <button type="button" onclick="fillTest('admin@cns.com.pe', 'admin123')" 
-                        class="p-2.5 bg-slate-50 hover:bg-blue-50/60 text-slate-800 rounded-xl text-left border border-slate-200 hover:border-blue-300 transition-colors flex items-center justify-between sm:block">
-                        <span class="block font-bold text-slate-700">Administrador</span>
-                        <span class="text-[10px] text-blue-900/70 font-medium">Acceso Total</span>
-                    </button>
-                </div>
-            </div>
         </div>
 
         <p class="text-center text-xs text-slate-400 mt-6 font-medium">
@@ -94,10 +78,6 @@
     </div>
 
     <script>
-        function fillTest(email, pwd) {
-            document.getElementById('correo').value = email;
-            document.getElementById('password').value = pwd;
-        }
 
         const form = document.getElementById('login-form');
         const alertBox = document.getElementById('alert-box');
