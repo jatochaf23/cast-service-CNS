@@ -264,7 +264,7 @@ app.get('/api/tickets', authMiddleware, async (req, res) => {
 });
 
 // Obtener detalle de un ticket específico (por ID o por NÚMERO DE TICKET, ej: TCK-2026-019)
-app.get('/api/tickets/:id', async (req, res) => {
+app.get('/api/tickets/:id', authMiddleware, async (req, res) => {
     try {
         const ticketIdOrNumber = req.params.id;
 
@@ -279,11 +279,17 @@ app.get('/api/tickets/:id', async (req, res) => {
         if (rows.length === 0) {
             return res.status(404).json({ 
                 success: false, 
-                message: `Ticket '${ticketIdOrNumber}' no encontrado en la base de datos cast_db.` 
+                message: `Ticket '${ticketIdOrNumber}' no encontrado en la base de datos.` 
             });
         }
 
         const ticket = rows[0];
+
+        // Un técnico solo puede abrir los tickets que tiene asignados
+        if (req.user.id_rol === 3 && ticket.id_usuario_asignado !== req.user.id_usuario) {
+            return res.status(403).json({ success: false, message: 'Este ticket no está asignado a su cuenta.' });
+        }
+
         res.json({ success: true, ticket });
     } catch (err) {
         console.error('Error al obtener ticket:', err);
