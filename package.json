@@ -9,16 +9,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/malsteen23-netizen/cast-service.git"
+    "url": "git+https://github.com/jatochaf23/cast-service.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/malsteen23-netizen/cast-service/issues"
+    "url": "https://github.com/jatochaf23/cast-service/issues"
   },
-  "homepage": "https://github.com/malsteen23-netizen/cast-service#readme",
+  "homepage": "https://github.com/jatochaf23/cast-service#readme",
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
