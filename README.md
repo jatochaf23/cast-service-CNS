@@ -1,60 +1,77 @@
-# Sistema de Constancias de Atención Servicio Técnico (CAST)
+# Sistema CAST (Constancia de Atención Servicio Técnico) - CNS
 
-Repositorio independiente y autónomo para la emisión, firma y generación de Constancias de Atención de Servicio Técnico (**CAST Multimarca** y **CAST Lexmark**).
-
----
-
-## 📋 Contenido del Repositorio
-
-- **`index.html`**: Portal principal de bienvenida para seleccionar entre el formato Multimarca y Lexmark.
-- **`cast_multimarca.html`**: Formato técnico de constancia para computadoras, laptops, servidores y equipos en general.
-- **`cast_lexmark.html`**: Formato técnico oficial de constancia especializado en impresoras y multifuncionales Lexmark.
-- **`logo.jpg` / `cns_logo.svg` / `logo.png`**: Logotipos y membretes institucionales.
-- **`cast_lexmark_logo.jpg`**: Membrete / cabecera oficial de Lexmark.
+Plataforma web para la gestión, asignación y emisión de Constancias de Atención de Servicio Técnico (**CAST Multimarca** y **CAST Lexmark**) con backend en **Node.js + Express** y base de datos relacional **MySQL / TiDB**.
 
 ---
 
-## 🚀 Características Principales
+## 🚀 Características
 
-1. **100% Autónomo (Client-Side)**: No requiere base de datos ni servidor backend. Funciona directamente en cualquier navegador abriendo los archivos HTML o a través de **GitHub Pages**.
-2. **Firmas Digitales en Pantalla**: Permite que tanto el técnico responsable como el usuario/cliente firmen con el mouse o en pantallas táctiles (teléfonos móviles, tablets).
-3. **Descarga en PDF (A4)**: Conversión y renderizado directo a documento PDF de alta fidelidad con tamaño estándar A4 usando `html2canvas` y `jsPDF`.
-4. **Control de Correlativo Inteligente**: El número correlativo se almacena en el `localStorage` del navegador y permite edición con un solo clic.
-5. **Listo para Impresión**: Estilos CSS `@media print` optimizados para imprimir directamente si se requiere soporte físico.
+- **Autenticación con Roles (JWT)**:
+  - **Administrador**: Gestión de tickets y control de usuarios/personal.
+  - **Dispatcher**: Creación y asignación directa de tickets a técnicos.
+  - **Técnicos**: Visualización de tickets asignados y emisión de constancias con firma digital.
+- **Formatos Técnicos Oficiales**:
+  - **CAST Multimarca**: Laptops, desktops, servidores y periféricos.
+  - **CAST Lexmark**: Impresoras y multifuncionales especializadas.
+- **Firma Digital & PDF**: Captura táctil/mouse de firmas y generación de PDF A4 en alta fidelidad.
+- **Preparado para la nube**: Compatible con **TiDB Serverless**, **Vercel**, **Railway** y servidores locales.
 
 ---
 
-## 🛠️ Cómo Subir este Proyecto a GitHub
+## 🛠️ Tecnologías
 
-Abre una terminal (PowerShell o Git Bash) dentro de esta carpeta y ejecuta los siguientes comandos:
+- **Backend**: Node.js, Express, MySQL2, JWT (jsonwebtoken), bcryptjs, CORS, cookie-parser.
+- **Frontend**: HTML5, Tailwind CSS, JavaScript (ES6+), Signature Pad, jsPDF, html2canvas.
+- **Base de Datos**: MySQL / TiDB.
 
-```bash
-# 1. Inicializar el repositorio Git
-git init
+---
 
-# 2. Agregar todos los archivos
-git add .
+## ⚙️ Instalación y Uso Local
 
-# 3. Crear el primer commit
-git commit -m "Initial commit - Sistema CAST (Multimarca y Lexmark)"
+1. **Clonar el repositorio:**
+   ```bash
+   git clone https://github.com/malsteen23-netizen/cast-service.git
+   cd cast-service
+   ```
 
-# 4. Establecer la rama principal como 'main'
-git branch -M main
+2. **Instalar dependencias:**
+   ```bash
+   npm install
+   ```
 
-# 5. Vincular a tu repositorio remoto de GitHub (reemplaza con tu URL de GitHub)
-git remote add origin https://github.com/TU_USUARIO/TU_REPOSITORIO.git
+3. **Configurar variables de entorno:**
+   Copia el archivo `.env.example` a `.env` y configura tus credenciales de base de datos:
+   ```env
+   PORT=3000
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_USER=root
+   DB_PASSWORD=tu_password
+   DB_NAME=cast_db
+   JWT_SECRET=tu_clave_secreta_jwt
+   ```
 
-# 6. Subir los archivos a GitHub
-git push -u origin main
+4. **Iniciar el servidor:**
+   ```bash
+   npm start
+   ```
+   Accede en el navegador a: `http://localhost:3000`
+
+---
+
+## 📋 Estructura del Proyecto
+
+```text
+cast-service/
+├── auth.js               # Middleware de autenticación y verificación de roles JWT
+├── db.js                 # Pool de conexiones MySQL / TiDB e inicialización
+├── server.js             # API REST (rutas de autenticación, usuarios y tickets)
+├── public/               # Frontend estático (vistas, scripts y assets)
+│   ├── index.html        # Portal principal y paneles según rol
+│   ├── login.html        # Inicio de sesión con accesos rápidos
+│   ├── cast_multimarca.html # Formato CAST Multimarca
+│   ├── cast_lexmark.html    # Formato CAST Lexmark
+│   └── cast_integration.js  # Lógica de carga y guardado de atenciones CAST
+├── package.json
+└── README.md
 ```
-
----
-
-## 🌐 Publicar en GitHub Pages (Gratis)
-
-Una vez subido a GitHub:
-1. Ve a tu repositorio en GitHub y haz clic en la pestaña **Settings** (Configuración).
-2. En el menú lateral izquierdo, ve a **Pages**.
-3. En **Branch**, selecciona `main` y la carpeta `/(root)`.
-4. Haz clic en **Save**.
-5. ¡Listo! En unos segundos tendrás una URL pública (ejemplo: `https://tu-usuario.github.io/tu-repositorio/`) para acceder al sistema desde cualquier computadora, tablet o smartphone.

@@ -294,7 +294,7 @@
         }
 
         .signature-button {
-            background-color: #2563eb;
+            background-color: #1e3a8a;
             color: white;
             padding: 8px 14px;
             border: none;
@@ -305,7 +305,7 @@
         }
 
         .signature-button:hover {
-            background-color: #1e40af;
+            background-color: #172554;
         }
 
         .signature-area label {
@@ -322,7 +322,7 @@
         }
 
         .form-actions button[type="submit"] {
-            background-color: #22c55e;
+            background-color: #1e3a8a;
             color: white;
             padding: 10px 24px;
             border: none;
@@ -330,29 +330,29 @@
             cursor: pointer;
             font-size: 1.05em;
             font-weight: 600;
-            box-shadow: 0 2px 6px rgba(34, 197, 94, 0.3);
+            box-shadow: 0 2px 6px rgba(30, 58, 138, 0.25);
             transition: background-color 0.2s;
         }
 
         .form-actions button[type="submit"]:hover {
-            background-color: #16a34a;
+            background-color: #172554;
         }
 
         .form-actions .print-button {
-            background-color: #2563eb;
+            background-color: #0b1a30;
             color: white;
             padding: 10px 24px;
-            border: none;
+            border: 1px solid #1b355c;
             border-radius: 8px;
             cursor: pointer;
             font-size: 1.05em;
             font-weight: 600;
-            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 2px 6px rgba(11, 26, 48, 0.25);
             transition: background-color 0.2s;
         }
 
         .form-actions .print-button:hover {
-            background-color: #1d4ed8;
+            background-color: #172554;
         }
 
         /* Modal Styles */
@@ -453,12 +453,12 @@
         }
 
         .save-button {
-            background-color: #2563eb;
+            background-color: #1e3a8a;
             color: white;
         }
 
         .save-button:hover {
-            background-color: #1d4ed8;
+            background-color: #172554;
         }
 
         /* Loading Overlay */
@@ -491,6 +491,99 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+
+        /* Estilos Responsivos para Celulares y Tablets */
+        @media screen and (max-width: 768px) {
+            body {
+                padding: 10px 6px;
+            }
+            .form-container {
+                padding: 12px 10px;
+                border-radius: 8px;
+            }
+            .header-bottom {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .form-title h2 {
+                font-size: 1.05em;
+            }
+            .form-number-date {
+                text-align: left;
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                border-top: 1px dashed #e2e8f0;
+                padding-top: 6px;
+            }
+            .grid-container {
+                grid-template-columns: 1fr !important;
+                gap: 6px;
+            }
+            .checkbox-group {
+                gap: 6px 12px;
+            }
+            .checkbox-group.single-line {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+            }
+            .parts-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 4px;
+            }
+            .parts-grid-tripled {
+                grid-template-columns: 1fr !important;
+                gap: 6px;
+            }
+            .parts-col-header:not(:first-child) {
+                display: none;
+            }
+            .time-inputs-single-line {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+            }
+            .time-field-item {
+                justify-content: space-between;
+            }
+            .time-field-item input[type="time"] {
+                width: 100%;
+                max-width: 110px;
+            }
+            .signature-section {
+                flex-direction: column;
+                gap: 14px;
+            }
+            .signature-area {
+                max-width: 100%;
+                width: 100%;
+            }
+            .signature-container {
+                height: 90px;
+            }
+            .form-actions {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .form-actions button,
+            .form-actions .print-button {
+                width: 100%;
+                padding: 12px;
+                font-size: 1em;
+            }
+            .modal-content {
+                width: 95%;
+                margin: 12% auto;
+                padding: 16px;
+            }
+            canvas {
+                height: 180px;
+            }
         }
 
         /* Configuración de Impresión: Sin Encabezado/Pie de página del navegador y exactamente 1 página por CAST */
@@ -1196,5 +1289,6 @@
             });
         });
     </script>
+    <script src="cast_integration.js"></script>
 </body>
 </html>

@@ -1,14 +1,18 @@
-# OS generated files
-.DS_Store
-Thumbs.db
-desktop.ini
-
-# Editor directories and files
-.idea/
-.vscode/
-*.sublime-project
-*.sublime-workspace
-
-# Logs and temporary files
-*.log
+# Dependencias
 node_modules/
+
+# Variables de entorno y credenciales
+.env
+.env.local
+.env.*.local
+
+# Archivos de respaldo y temporales
+cast-service-main.zip
+cast-service-main/
+*.log
+npm-debug.log*
+
+# Vercel y builds
+.vercel
+dist/
+build/

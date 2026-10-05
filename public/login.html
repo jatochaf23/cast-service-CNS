@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - Sistema CAST</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#0b172a] min-h-screen flex items-center justify-center p-4 selection:bg-[#1e3a8a] selection:text-white">
+
+    <div class="max-w-md w-full">
+        <!-- Logo & Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center bg-white p-3 rounded-2xl shadow-md border border-blue-950/20 mb-4">
+                <img src="logo.jpg" alt="CNS Logo" class="h-10 object-contain">
+            </div>
+            <h1 class="text-2xl font-bold text-white tracking-tight">Sistema CAST CNS</h1>
+            <p class="text-xs text-blue-200/70 mt-1 uppercase tracking-wider font-semibold">Portal de Atención y Constancias de Servicio Técnico</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 border border-slate-200">
+            <h2 class="text-lg font-bold text-[#0f172a] tracking-tight mb-0.5">Iniciar Sesión</h2>
+            <p class="text-xs text-slate-500 mb-6">Autenticación corporativa de personal autorizado</p>
+
+            <div id="alert-box" class="hidden mb-4 p-3 rounded-xl text-xs font-semibold"></div>
+
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1" for="correo">
+                        Correo Electrónico
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"></path></svg>
+                        </span>
+                        <input type="email" id="correo" required
+                            placeholder="ejemplo@cns.com.pe"
+                            class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] focus:bg-white focus:border-[#1e3a8a] transition-all">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1" for="password">
+                        Contraseña
+                    </label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        </span>
+                        <input type="password" id="password" required
+                            placeholder="••••••••"
+                            class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] focus:bg-white focus:border-[#1e3a8a] transition-all">
+                    </div>
+                </div>
+
+                <button type="submit" id="submit-btn"
+                    class="w-full py-3 px-4 bg-[#1e3a8a] hover:bg-[#172554] active:bg-[#0f172a] text-white font-semibold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2">
+                    <span id="btn-text">Ingresar al Sistema</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                </button>
+            </form>
+
+            <!-- Acceso Rápido / Credenciales de Prueba -->
+            <div class="mt-6 pt-5 border-t border-slate-100">
+                <p class="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">Acceso Rápido de Prueba:</p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px]">
+                    <button type="button" onclick="fillTest('oricra@cns.com.pe', 'tecnico123')" 
+                        class="p-2.5 bg-slate-50 hover:bg-blue-50/60 text-slate-800 rounded-xl text-left border border-slate-200 hover:border-blue-300 transition-colors flex items-center justify-between sm:block">
+                        <span class="block font-bold text-slate-700">Técnico</span>
+                        <span class="text-[10px] text-blue-900/70 font-medium">Omar Ricra</span>
+                    </button>
+                    <button type="button" onclick="fillTest('dispatcher@cns.com.pe', 'dispa123')" 
+                        class="p-2.5 bg-slate-50 hover:bg-blue-50/60 text-slate-800 rounded-xl text-left border border-slate-200 hover:border-blue-300 transition-colors flex items-center justify-between sm:block">
+                        <span class="block font-bold text-slate-700">Dispatcher</span>
+                        <span class="text-[10px] text-blue-900/70 font-medium">Coordinación</span>
+                    </button>
+                    <button type="button" onclick="fillTest('admin@cns.com.pe', 'admin123')" 
+                        class="p-2.5 bg-slate-50 hover:bg-blue-50/60 text-slate-800 rounded-xl text-left border border-slate-200 hover:border-blue-300 transition-colors flex items-center justify-between sm:block">
+                        <span class="block font-bold text-slate-700">Administrador</span>
+                        <span class="text-[10px] text-blue-900/70 font-medium">Acceso Total</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <p class="text-center text-xs text-slate-400 mt-6 font-medium">
+            © 2026 CNS - Constancias de Atención Servicio Técnico
+        </p>
+    </div>
+
+    <script>
+        function fillTest(email, pwd) {
+            document.getElementById('correo').value = email;
+            document.getElementById('password').value = pwd;
+        }
+
+        const form = document.getElementById('login-form');
+        const alertBox = document.getElementById('alert-box');
+        const submitBtn = document.getElementById('submit-btn');
+        const btnText = document.getElementById('btn-text');
+
+        function showAlert(msg, isError = true) {
+            alertBox.className = `mb-4 p-3 rounded-xl text-xs font-semibold ${
+                isError ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-green-50 text-green-700 border border-green-200'
+            }`;
+            alertBox.textContent = msg;
+            alertBox.classList.remove('hidden');
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            alertBox.classList.add('hidden');
+            
+            const correo = document.getElementById('correo').value.trim();
+            const password = document.getElementById('password').value;
+
+            btnText.textContent = 'Verificando...';
+            submitBtn.disabled = true;
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ correo, password })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok || !data.success) {
+                    showAlert(data.message || 'Error al iniciar sesión');
+                    btnText.textContent = 'Ingresar al Sistema';
+                    submitBtn.disabled = false;
+                    return;
+                }
+
+                // Guardar token y datos de usuario en localStorage
+                localStorage.setItem('cast_token', data.token);
+                localStorage.setItem('cast_user', JSON.stringify(data.user));
+
+                showAlert('Credenciales correctas. Redirigiendo...', false);
+                setTimeout(() => {
+                    window.location.href = '/index.html';
+                }, 600);
+
+            } catch (err) {
+                console.error(err);
+                showAlert('Error de conexión con el servidor.');
+                btnText.textContent = 'Ingresar al Sistema';
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

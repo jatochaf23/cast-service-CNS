@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal CAST - Gestión de Constancias de Servicio Técnico</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col selection:bg-blue-600 selection:text-white">
+
+    <!-- Top Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="h-10 w-10 bg-[#0f2942] rounded-xl flex items-center justify-center text-white font-bold shadow-sm">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight text-slate-900 tracking-tight">Portal CAST</h1>
+                    <p class="text-xs text-slate-500 font-medium">CNS - Servicios de Soporte y Atención Técnica</p>
+                </div>
+            </div>
+
+            <!-- User Profile & Logout -->
+            <div class="flex items-center gap-2 sm:gap-3">
+                <div class="flex flex-col text-right">
+                    <span id="nav-user-name" class="text-xs sm:text-sm font-bold text-slate-800 leading-none truncate max-w-[110px] sm:max-w-none">Cargando...</span>
+                    <span id="nav-user-role" class="text-[10px] sm:text-xs text-slate-500 mt-0.5 truncate max-w-[110px] sm:max-w-none">...</span>
+                </div>
+                <div id="role-badge" class="px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-semibold whitespace-nowrap">...</div>
+                <button onclick="openChangePasswordModal()" title="Cambiar mi contraseña" 
+                    class="p-2 text-slate-600 hover:text-blue-600 hover:bg-blue-50 rounded-xl border border-slate-200 transition-colors flex items-center gap-1.5 text-xs font-semibold">
+                    <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                    <span class="hidden sm:inline">Cambiar Clave</span>
+                </button>
+                <button onclick="logout()" title="Cerrar sesión" 
+                    class="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl border border-slate-200 transition-colors">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Notification Toast Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        <!-- ============================================================== -->
+        <!-- VISTA DE ADMINISTRADOR Y DISPATCHER -->
+        <!-- ============================================================== -->
+        <div id="admin-dispatcher-view" class="hidden space-y-6">
+            
+            <!-- Header section & actions -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-900 tracking-tight">Gestión y Asignación de Tickets</h2>
+                    <p class="text-sm text-slate-500">Asigne constancias técnicas con número de ticket específico a cada técnico.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button id="btn-manage-users" onclick="openUsersModal()" class="hidden inline-flex items-center gap-1.5 px-3 py-2.5 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-xl border border-slate-300 transition-all">
+                        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                        <span>Usuarios / Personal</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- KPI Counters -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Tickets</p>
+                        <h3 id="stat-total" class="text-2xl font-extrabold text-slate-900 mt-1">0</h3>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 border border-slate-200/60">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Pendientes</p>
+                        <h3 id="stat-pendientes" class="text-2xl font-extrabold text-slate-800 mt-1">0</h3>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-amber-50/70 border border-amber-200/60 flex items-center justify-center text-amber-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">En Proceso</p>
+                        <h3 id="stat-proceso" class="text-2xl font-extrabold text-slate-800 mt-1">0</h3>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Atendidos</p>
+                        <h3 id="stat-atendidos" class="text-2xl font-extrabold text-emerald-900 mt-1">0</h3>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50/70 border border-emerald-200/60 flex items-center justify-center text-emerald-800">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ASIGNACIÓN DIRECTA DE TICKET (SOLO COLOCAR NÚMERO DE TICKET Y TÉCNICO) -->
+            <div class="bg-[#0b1a30] p-5 rounded-2xl border border-[#1b355c] shadow-sm text-white">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="p-1.5 bg-[#132a4d] rounded-lg text-blue-200 border border-[#1e3e6b]">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                    </span>
+                    <div>
+                        <h3 class="text-sm font-bold tracking-tight text-white">Asignación Directa de CAST por N° de Ticket</h3>
+                        <p class="text-xs text-blue-200/70">Ingrese el número de ticket registrado en la base de datos para asignarlo al técnico responsable:</p>
+                    </div>
+                </div>
+
+                <form onsubmit="handleQuickAssign(event)" class="mt-3 grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                    <div class="sm:col-span-4">
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-blue-200/70 mb-1">N° de Ticket (ej: TCK-2026-019)</label>
+                        <input type="text" id="quick-ticket-input" required list="tickets-datalist" placeholder="Ingrese o seleccione ticket..."
+                            class="w-full px-3 py-2.5 bg-[#060f1c] border border-[#1b355c] rounded-xl text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] font-mono">
+                        <datalist id="tickets-datalist"></datalist>
+                    </div>
+
+                    <div class="sm:col-span-3">
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-blue-200/70 mb-1">Formato CAST</label>
+                        <select id="quick-formato-select" required
+                            class="w-full px-3 py-2.5 bg-[#060f1c] border border-[#1b355c] rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] font-medium">
+                            <option value="Multimarca">Multimarca (General)</option>
+                            <option value="Lexmark">Lexmark (Especializado)</option>
+                        </select>
+                    </div>
+
+                    <div class="sm:col-span-3">
+                        <label class="block text-[11px] font-bold uppercase tracking-wider text-blue-200/70 mb-1">Técnico Responsable</label>
+                        <select id="quick-tecnico-select" required
+                            class="w-full px-3 py-2.5 bg-[#060f1c] border border-[#1b355c] rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+                            <option value="">-- Seleccionar Técnico --</option>
+                        </select>
+                    </div>
+
+                    <div class="sm:col-span-2">
+                        <button type="submit" id="btn-quick-assign"
+                            class="w-full py-2.5 px-3 bg-[#1e3a8a] hover:bg-[#172554] active:bg-[#0b1a30] text-white font-semibold text-xs rounded-xl border border-[#2d52a8] shadow-sm transition-all flex items-center justify-center gap-1.5 min-h-[40px]">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            <span>Asignar CAST</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Filters Bar -->
+            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+                    <button onclick="setFilter('Todos')" id="filter-Todos" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#1e3a8a] text-white whitespace-nowrap">Todos</button>
+                    <button onclick="setFilter('Pendiente')" id="filter-Pendiente" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 hover:bg-blue-50/60 hover:text-blue-900 border border-slate-200 whitespace-nowrap">Pendientes</button>
+                    <button onclick="setFilter('En Proceso')" id="filter-En Proceso" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 hover:bg-blue-50/60 hover:text-blue-900 border border-slate-200 whitespace-nowrap">En Proceso</button>
+                    <button onclick="setFilter('Atendido')" id="filter-Atendido" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 hover:bg-blue-50/60 hover:text-blue-900 border border-slate-200 whitespace-nowrap">Atendidos</button>
+                </div>
+                <div class="relative w-full sm:w-72">
+                    <input type="text" id="search-input" onkeyup="renderTicketsTable()" placeholder="Buscar por ticket, cliente o serie..."
+                        class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Tickets Desktop Table View (>= md) -->
+            <div class="hidden md:block bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100/75 border-b border-slate-200 text-slate-600 font-bold uppercase text-[11px] tracking-wider">
+                                <th class="py-3.5 px-4">Ticket</th>
+                                <th class="py-3.5 px-4">Cliente / Usuario</th>
+                                <th class="py-3.5 px-4">Ubicación</th>
+                                <th class="py-3.5 px-4">Equipo</th>
+                                <th class="py-3.5 px-4">Formato</th>
+                                <th class="py-3.5 px-4">Técnico Asignado</th>
+                                <th class="py-3.5 px-4">Estado</th>
+                                <th class="py-3.5 px-4 text-center">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tickets-table-body" class="divide-y divide-slate-100">
+                            <tr>
+                                <td colspan="8" class="text-center py-8 text-slate-400">Cargando tickets de la base de datos...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Tickets Mobile Cards View (< md) -->
+            <div id="tickets-cards-mobile" class="block md:hidden space-y-3">
+                <div class="text-center py-8 text-slate-400 bg-white rounded-2xl border border-slate-200 p-4">
+                    Cargando tickets de la base de datos...
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ============================================================== -->
+        <!-- VISTA DE TÉCNICO (PORTAL DEL TÉCNICO) -->
+        <!-- ============================================================== -->
+        <div id="tecnico-view" class="hidden space-y-6">
+            <!-- Welcome Banner -->
+            <div class="bg-[#0b1a30] rounded-2xl p-6 sm:p-8 text-white border border-[#1b355c] shadow-sm">
+                <div class="max-w-2xl">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-[#132a4d] text-blue-200 border border-[#1e3e6b] mb-3">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                        Área de Atención Técnica
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-bold tracking-tight" id="tecnico-welcome-name">Mis Tickets Asignados</h2>
+                    <p class="text-sm text-blue-200/70 mt-2">
+                        Relación de tickets asignados a su cuenta. Al hacer clic sobre cualquier ticket se abrirá el formulario CAST con los datos precargados automáticamente para su atención en sitio.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Grid of Assigned Tickets -->
+            <div>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-bold text-slate-900">Tickets para Atender (<span id="tecnico-count">0</span>)</h3>
+                    <button onclick="loadTickets()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        Actualizar
+                    </button>
+                </div>
+
+                <div id="tecnico-tickets-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <!-- Dynamic cards injected here -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- MODAL: GESTIÓN DE USUARIOS (SOLO ADMINISTRADOR) -->
+    <div id="users-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-900">Usuarios y Técnicos de la Base de Datos</h3>
+                    <p class="text-xs text-slate-500">Gestión de personal registrado en cast_db.</p>
+                </div>
+                <button onclick="closeUsersModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <!-- Form to create user -->
+            <form id="create-user-form" onsubmit="submitNewUser(event)" class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 mb-4 grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1">Nombre</label>
+                    <input type="text" id="u-nombre" required placeholder="Nombre completo" class="w-full p-1.5 border border-slate-300 rounded bg-white">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1">Correo</label>
+                    <input type="email" id="u-correo" required placeholder="usuario@cns.com.pe" class="w-full p-1.5 border border-slate-300 rounded bg-white">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1">Rol</label>
+                    <select id="u-rol" class="w-full p-1.5 border border-slate-300 rounded bg-white">
+                        <option value="3">Técnico</option>
+                        <option value="2">Dispatcher</option>
+                        <option value="1">Administrador</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1">Contraseña</label>
+                    <div class="flex gap-1">
+                        <input type="password" id="u-password" required placeholder="••••••" class="w-full p-1.5 border border-slate-300 rounded bg-white">
+                        <button type="submit" class="px-3 bg-slate-900 text-white rounded font-bold text-xs hover:bg-slate-800 transition-colors">+</button>
+                    </div>
+                </div>
+            </form>
+
+            <div class="overflow-y-auto flex-1">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-100 text-slate-600 font-bold uppercase text-[10px]">
+                        <tr>
+                            <th class="py-2 px-3">ID</th>
+                            <th class="py-2 px-3">Nombre</th>
+                            <th class="py-2 px-3">Correo</th>
+                            <th class="py-2 px-3">Rol</th>
+                            <th class="py-2 px-3">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-table-body" class="divide-y divide-slate-100">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CAMBIAR CONTRASEÑA (PARA CUALQUIER USUARIO LOGUEADO) -->
+    <div id="change-pwd-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 sm:p-7 shadow-2xl border border-slate-100 flex flex-col">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 leading-tight">Cambiar mi Contraseña</h3>
+                        <p class="text-xs text-slate-500">Actualice sus credenciales de acceso</p>
+                    </div>
+                </div>
+                <button onclick="closeChangePasswordModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <form id="change-pwd-form" onsubmit="submitChangePassword(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Contraseña Actual</label>
+                    <input type="password" id="cp-actual" required placeholder="Ingrese su contraseña actual" 
+                        class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Nueva Contraseña</label>
+                    <input type="password" id="cp-nueva" required minlength="4" placeholder="Mínimo 4 caracteres" 
+                        class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Confirmar Nueva Contraseña</label>
+                    <input type="password" id="cp-confirmar" required minlength="4" placeholder="Repita la nueva contraseña" 
+                        class="w-full px-3 py-2 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="closeChangePasswordModal()" class="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" id="cp-btn-submit" class="px-4 py-2 bg-[#1e3a8a] hover:bg-[#172554] text-white text-xs font-bold rounded-xl transition-colors shadow-sm">
+                        Actualizar Contraseña
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = (window.location.origin && window.location.origin.startsWith('http')) ? '' : 'http://localhost:3000';
+        let currentUser = null;
+        let allTickets = [];
+        let allTecnicos = [];
+        let currentFilter = 'Todos';
+
+        // Autenticación al cargar
+        async function checkAuth() {
+            const token = localStorage.getItem('cast_token');
+            if (!token) {
+                window.location.href = '/login.html';
+                return;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/api/auth/me`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) {
+                    localStorage.removeItem('cast_token');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                const data = await res.json();
+                currentUser = data.user;
+                setupUIForUser();
+            } catch (err) {
+                console.error(err);
+                window.location.href = '/login.html';
+            }
+        }
+
+        function setupUIForUser() {
+            document.getElementById('nav-user-name').textContent = currentUser.nombre;
+            document.getElementById('nav-user-role').textContent = currentUser.correo;
+
+            const badge = document.getElementById('role-badge');
+            if (currentUser.id_rol === 1) {
+                badge.className = 'px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase bg-[#0b1a30] text-white border border-[#1b355c]';
+                badge.textContent = 'ADMINISTRADOR';
+                document.getElementById('btn-manage-users').classList.remove('hidden');
+                document.getElementById('admin-dispatcher-view').classList.remove('hidden');
+                loadTecnicos();
+                loadTickets();
+            } else if (currentUser.id_rol === 2) {
+                badge.className = 'px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase bg-blue-50 text-[#1e3a8a] border border-blue-200';
+                badge.textContent = 'DISPATCHER';
+                document.getElementById('admin-dispatcher-view').classList.remove('hidden');
+                loadTecnicos();
+                loadTickets();
+            } else {
+                badge.className = 'px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase bg-slate-100 text-slate-800 border border-slate-300';
+                badge.textContent = 'TÉCNICO';
+                document.getElementById('tecnico-welcome-name').textContent = `Bienvenido, ${currentUser.nombre}`;
+                document.getElementById('tecnico-view').classList.remove('hidden');
+                loadTickets();
+            }
+        }
+
+        async function logout() {
+            try {
+                await fetch(`${API_BASE}/api/auth/logout`, { method: 'POST' });
+            } catch (e) {}
+            localStorage.removeItem('cast_token');
+            localStorage.removeItem('cast_user');
+            window.location.href = '/login.html';
+        }
+
+        // Cargar técnicos para asignación
+        async function loadTecnicos() {
+            const token = localStorage.getItem('cast_token');
+            try {
+                const res = await fetch(`${API_BASE}/api/tecnicos`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    allTecnicos = data.tecnicos;
+
+                    // Selector en modal nuevo ticket
+                    const selectModal = document.getElementById('m-id_usuario_asignado');
+                    if (selectModal) {
+                        selectModal.innerHTML = '<option value="">-- Sin Asignar --</option>';
+                        allTecnicos.forEach(t => {
+                            selectModal.innerHTML += `<option value="${t.id_usuario}">${t.nombre} (${t.tickets_activos} activos)</option>`;
+                        });
+                    }
+
+                    // Selector en barra de asignación directa
+                    const selectQuick = document.getElementById('quick-tecnico-select');
+                    if (selectQuick) {
+                        selectQuick.innerHTML = '<option value="">-- Seleccionar Técnico --</option>';
+                        allTecnicos.forEach(t => {
+                            selectQuick.innerHTML += `<option value="${t.id_usuario}">${t.nombre} (${t.tickets_activos} activos)</option>`;
+                        });
+                    }
+                }
+            } catch (err) {
+                console.error('Error al cargar técnicos:', err);
+            }
+        }
+
+        // Cargar tickets
+        async function loadTickets() {
+            const token = localStorage.getItem('cast_token');
+            try {
+                const res = await fetch(`${API_BASE}/api/tickets`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    allTickets = data.tickets;
+
+                    // Poblar datalist con tickets existentes en la BD
+                    const datalist = document.getElementById('tickets-datalist');
+                    if (datalist) {
+                        datalist.innerHTML = allTickets.map(t => 
+                            `<option value="${t.numero_ticket}">${t.cliente} - S/N: ${t.serie || 'N/A'}</option>`
+                        ).join('');
+                    }
+
+                    if (currentUser.id_rol === 3) {
+                        renderTecnicoGrid();
+                    } else {
+                        updateStats();
+                        renderTicketsTable();
+                    }
+                }
+            } catch (err) {
+                console.error('Error al cargar tickets:', err);
+                showToast('Error al conectar con la base de datos.', true);
+            }
+        }
+
+        // Asignación rápida solo ingresando Número de Ticket y Técnico
+        async function handleQuickAssign(e) {
+            e.preventDefault();
+            const token = localStorage.getItem('cast_token');
+            const numTicket = document.getElementById('quick-ticket-input').value.trim();
+            const idTecnico = document.getElementById('quick-tecnico-select').value;
+            const tipoFormato = document.getElementById('quick-formato-select') ? document.getElementById('quick-formato-select').value : 'Multimarca';
+
+            if (!numTicket || !idTecnico) {
+                showToast('Ingrese el número de ticket y seleccione el técnico.', true);
+                return;
+            }
+
+            const btn = document.getElementById('btn-quick-assign');
+            btn.disabled = true;
+            btn.textContent = 'Asignando...';
+
+            try {
+                const res = await fetch(`${API_BASE}/api/tickets/asignar-por-numero`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        numero_ticket: numTicket,
+                        id_usuario_asignado: parseInt(idTecnico),
+                        tipo_formato: tipoFormato
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message);
+                    document.getElementById('quick-ticket-input').value = '';
+                    loadTickets();
+                } else {
+                    showToast(data.message || 'Error al asignar', true);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error de red al asignar ticket.', true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span>Asignar CAST</span>
+                `;
+            }
+        }
+
+        function updateStats() {
+            const total = allTickets.length;
+            const pendientes = allTickets.filter(t => t.estado_ticket === 'Pendiente').length;
+            const proceso = allTickets.filter(t => t.estado_ticket === 'En Proceso').length;
+            const atendidos = allTickets.filter(t => t.estado_ticket === 'Atendido').length;
+
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-pendientes').textContent = pendientes;
+            document.getElementById('stat-proceso').textContent = proceso;
+            document.getElementById('stat-atendidos').textContent = atendidos;
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                btn.className = 'filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 hover:bg-blue-50/60 hover:text-blue-900 border border-slate-200 whitespace-nowrap';
+            });
+            const activeBtn = document.getElementById(`filter-${filter}`);
+            if (activeBtn) {
+                activeBtn.className = 'filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#1e3a8a] text-white whitespace-nowrap';
+            }
+            renderTicketsTable();
+        }
+
+        // Renderizado para Administrador y Dispatcher (Dual: Tabla Desktop + Tarjetas Mobile)
+        function renderTicketsTable() {
+            const tbody = document.getElementById('tickets-table-body');
+            const mobileContainer = document.getElementById('tickets-cards-mobile');
+            const search = document.getElementById('search-input').value.toLowerCase().trim();
+
+            let filtered = allTickets;
+            if (currentFilter !== 'Todos') {
+                filtered = filtered.filter(t => t.estado_ticket === currentFilter);
+            }
+
+            if (search) {
+                filtered = filtered.filter(t => 
+                    (t.numero_ticket && t.numero_ticket.toLowerCase().includes(search)) ||
+                    (t.cliente && t.cliente.toLowerCase().includes(search)) ||
+                    (t.usuario && t.usuario.toLowerCase().includes(search)) ||
+                    (t.serie && t.serie.toLowerCase().includes(search)) ||
+                    (t.nombre_tecnico && t.nombre_tecnico.toLowerCase().includes(search))
+                );
+            }
+
+            if (filtered.length === 0) {
+                if (tbody) tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-400">No se encontraron tickets con los criterios seleccionados.</td></tr>`;
+                if (mobileContainer) mobileContainer.innerHTML = `<div class="text-center py-8 text-slate-400 bg-white rounded-2xl border border-slate-200 p-4">No se encontraron tickets con los criterios seleccionados.</div>`;
+                return;
+            }
+
+            // Desktop Table Rows
+            if (tbody) {
+                tbody.innerHTML = filtered.map(t => {
+                    const formatoSelect = `
+                        <select onchange="changeFormat(${t.id_ticket}, this.value)" class="text-[11px] font-medium rounded-md px-2 py-1 border border-slate-300 bg-white text-slate-800 cursor-pointer hover:bg-slate-50 focus:outline-none focus:ring-1 focus:ring-[#1e3a8a]">
+                            <option value="Multimarca" ${t.tipo_formato === 'Multimarca' ? 'selected' : ''}>Multimarca</option>
+                            <option value="Lexmark" ${t.tipo_formato === 'Lexmark' ? 'selected' : ''}>Lexmark</option>
+                        </select>
+                    `;
+
+                    let estadoBadge = '';
+                    if (t.estado_ticket === 'Atendido') {
+                        estadoBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-emerald-50 text-emerald-800 border border-emerald-300">Atendido</span>`;
+                    } else if (t.estado_ticket === 'En Proceso') {
+                        estadoBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-blue-50 text-[#1e3a8a] border border-blue-200">En Proceso</span>`;
+                    } else {
+                        estadoBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-amber-50 text-amber-800 border border-amber-300">Pendiente</span>`;
+                    }
+
+                    let tecnicoSelect = `
+                        <select onchange="assignTechnician(${t.id_ticket}, this.value)" class="text-xs bg-white border border-slate-300 rounded-md p-1 max-w-[150px] font-medium text-slate-800 focus:outline-none focus:ring-1 focus:ring-[#1e3a8a]">
+                            <option value="">-- Sin Asignar --</option>
+                            ${allTecnicos.map(tec => `
+                                <option value="${tec.id_usuario}" ${t.id_usuario_asignado === tec.id_usuario ? 'selected' : ''}>
+                                    ${tec.nombre}
+                                </option>
+                            `).join('')}
+                        </select>
+                    `;
+
+                    const castUrl = t.tipo_formato === 'Lexmark' 
+                        ? `cast_lexmark.html?ticket_id=${t.id_ticket}` 
+                        : `cast_multimarca.html?ticket_id=${t.id_ticket}`;
+
+                    return `
+                        <tr class="hover:bg-slate-50/80 transition-colors">
+                            <td class="py-3 px-4 font-mono font-bold text-[#1e3a8a] bg-blue-50/30">${t.numero_ticket}</td>
+                            <td class="py-3 px-4">
+                                <div class="font-bold text-slate-900">${t.cliente}</div>
+                                <div class="text-[11px] text-slate-500">${t.usuario || '-'}</div>
+                            </td>
+                            <td class="py-3 px-4">
+                                <div class="text-slate-800">${t.distrito || '-'}</div>
+                                <div class="text-[10px] text-slate-400 truncate max-w-[140px]">${t.direccion || ''}</div>
+                            </td>
+                            <td class="py-3 px-4">
+                                <div class="font-medium text-slate-800">${t.marca || ''} ${t.modelo || ''}</div>
+                                <div class="text-[10px] text-slate-400 font-mono">S/N: ${t.serie || 'N/A'}</div>
+                            </td>
+                            <td class="py-3 px-4">${formatoSelect}</td>
+                            <td class="py-3 px-4">${tecnicoSelect}</td>
+                            <td class="py-3 px-4">${estadoBadge}</td>
+                            <td class="py-3 px-4 text-center">
+                                <a href="${castUrl}" target="_blank" 
+                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold bg-[#1e3a8a] text-white hover:bg-[#172554] active:bg-[#0b1a30] transition-all shadow-sm">
+                                    <span>Abrir CAST</span>
+                                    <svg class="w-3 h-3 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                </a>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            // Mobile Cards View
+            if (mobileContainer) {
+                mobileContainer.innerHTML = filtered.map(t => {
+                    const isLexmark = t.tipo_formato === 'Lexmark';
+                    const castUrl = isLexmark 
+                        ? `cast_lexmark.html?ticket_id=${t.id_ticket}` 
+                        : `cast_multimarca.html?ticket_id=${t.id_ticket}`;
+
+                    let estadoBadge = '';
+                    if (t.estado_ticket === 'Atendido') {
+                        estadoBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-emerald-50 text-emerald-800 border border-emerald-300">Atendido</span>`;
+                    } else if (t.estado_ticket === 'En Proceso') {
+                        estadoBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-blue-50 text-[#1e3a8a] border border-blue-200">En Proceso</span>`;
+                    } else {
+                        estadoBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-amber-50 text-amber-800 border border-amber-300">Pendiente</span>`;
+                    }
+
+                    return `
+                        <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3">
+                            <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+                                <span class="font-mono font-bold text-[#1e3a8a] bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200 text-xs">
+                                    ${t.numero_ticket}
+                                </span>
+                                ${estadoBadge}
+                            </div>
+
+                            <div>
+                                <h4 class="font-bold text-slate-900 text-sm leading-tight">${t.cliente}</h4>
+                                <div class="text-xs text-slate-500 mt-0.5">👤 Contacto: <span class="text-slate-700 font-medium">${t.usuario || 'N/A'}</span></div>
+                            </div>
+
+                            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-xs space-y-1">
+                                <div class="text-slate-600 flex items-start gap-1">
+                                    <span class="text-slate-400 font-medium">📍</span>
+                                    <span>${t.distrito || ''}${t.distrito && t.direccion ? ' - ' : ''}${t.direccion || 'Sin dirección'}</span>
+                                </div>
+                                <div class="text-slate-600 flex items-center justify-between pt-1 border-t border-slate-200/50">
+                                    <span>🖨️ ${t.marca || ''} ${t.modelo || ''}</span>
+                                    <span class="font-mono text-[10px] text-slate-500 bg-slate-200/60 px-1.5 py-0.5 rounded">S/N: ${t.serie || 'N/A'}</span>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-2 pt-1 text-xs">
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Formato CAST</label>
+                                    <select onchange="changeFormat(${t.id_ticket}, this.value)" class="w-full text-xs font-medium rounded-md p-1.5 border border-slate-300 bg-white text-slate-800">
+                                        <option value="Multimarca" ${!isLexmark ? 'selected' : ''}>Multimarca</option>
+                                        <option value="Lexmark" ${isLexmark ? 'selected' : ''}>Lexmark</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Técnico Asignado</label>
+                                    <select onchange="assignTechnician(${t.id_ticket}, this.value)" class="w-full text-xs bg-white border border-slate-300 rounded-md p-1.5 font-medium text-slate-800">
+                                        <option value="">-- Sin Asignar --</option>
+                                        ${allTecnicos.map(tec => `
+                                            <option value="${tec.id_usuario}" ${t.id_usuario_asignado === tec.id_usuario ? 'selected' : ''}>
+                                                ${tec.nombre}
+                                            </option>
+                                        `).join('')}
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="pt-2 border-t border-slate-100">
+                                <a href="${castUrl}" target="_blank" 
+                                    class="w-full py-2.5 px-3 rounded-xl bg-[#1e3a8a] hover:bg-[#172554] active:bg-[#0b1a30] text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all">
+                                    <span>Abrir Formato CAST</span>
+                                    <svg class="w-3.5 h-3.5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Asignar técnico con 1 clic
+        async function assignTechnician(ticketId, tecnicoId) {
+            const token = localStorage.getItem('cast_token');
+            try {
+                const res = await fetch(`${API_BASE}/api/tickets/${ticketId}/asignar`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ id_usuario_asignado: tecnicoId || null })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message);
+                    loadTickets();
+                } else {
+                    showToast(data.message || 'Error al asignar', true);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error de conexión', true);
+            }
+        }
+
+        // Cambiar formato con 1 clic (Multimarca / Lexmark)
+        async function changeFormat(ticketId, formato) {
+            const token = localStorage.getItem('cast_token');
+            try {
+                const res = await fetch(`${API_BASE}/api/tickets/${ticketId}/formato`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ tipo_formato: formato })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message);
+                    loadTickets();
+                } else {
+                    showToast(data.message || 'Error al cambiar formato', true);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error de conexión al cambiar formato', true);
+            }
+        }
+
+        // Renderizado para Técnico (Portal de Tickets Asignados)
+        function renderTecnicoGrid() {
+            const grid = document.getElementById('tecnico-tickets-grid');
+            document.getElementById('tecnico-count').textContent = allTickets.length;
+
+            if (allTickets.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center bg-white rounded-2xl border border-slate-200 p-6">
+                        <svg class="w-12 h-12 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        <h4 class="text-base font-bold text-slate-800">No tiene tickets asignados actualmente</h4>
+                        <p class="text-xs text-slate-500 mt-1">El dispatcher le asignará tickets cuando se programen servicios.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = allTickets.map(t => {
+                const isLexmark = t.tipo_formato === 'Lexmark';
+                const castUrl = isLexmark 
+                    ? `cast_lexmark.html?ticket_id=${t.id_ticket}` 
+                    : `cast_multimarca.html?ticket_id=${t.id_ticket}`;
+
+                let statusBadge = '';
+                if (t.estado_ticket === 'Atendido') {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase bg-emerald-50 text-emerald-800 border border-emerald-300">Atendido</span>`;
+                } else if (t.estado_ticket === 'En Proceso') {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase bg-blue-50 text-[#1e3a8a] border border-blue-200">En Proceso</span>`;
+                } else {
+                    statusBadge = `<span class="px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase bg-amber-50 text-amber-800 border border-amber-300">Pendiente</span>`;
+                }
+
+                return `
+                    <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:border-blue-200 hover:shadow-md transition-all flex flex-col justify-between group">
+                        <div>
+                            <!-- Header de Ticket -->
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="font-mono font-bold text-[#1e3a8a] bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200 text-xs">
+                                    ${t.numero_ticket}
+                                </span>
+                                ${statusBadge}
+                            </div>
+
+                            <!-- Cliente y Usuario -->
+                            <h4 class="font-bold text-slate-900 text-base leading-tight">${t.cliente}</h4>
+                            <p class="text-xs text-slate-500 mt-0.5">👤 Contacto: <span class="font-medium text-slate-700">${t.usuario || 'N/A'}</span></p>
+
+                            <!-- Ubicación -->
+                            <div class="mt-3 text-xs bg-slate-50 p-2.5 rounded-xl border border-slate-100 space-y-1">
+                                <div class="text-slate-600 flex items-start gap-1">
+                                    <svg class="w-3.5 h-3.5 text-slate-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+                                    <span>${t.direccion || 'Sin dirección'}, <strong>${t.distrito || ''}</strong></span>
+                                </div>
+                                ${t.telefono ? `
+                                <div class="text-slate-600 flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5 text-slate-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
+                                    <span>${t.telefono}</span>
+                                </div>` : ''}
+                            </div>
+
+                            <!-- Equipo -->
+                            <div class="mt-3 text-xs border-t border-slate-100 pt-2.5">
+                                <div class="flex items-center justify-between text-slate-600">
+                                    <span>Equipo: <strong class="text-slate-800">${t.marca || ''} ${t.modelo || ''}</strong></span>
+                                    <span class="font-mono text-[11px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded">S/N: ${t.serie || 'N/A'}</span>
+                                </div>
+                            </div>
+
+                            <!-- Incidencia / Requerimiento -->
+                            ${t.incidencia ? `
+                            <div class="mt-2 text-[11px] text-slate-700 bg-slate-50 p-2 rounded-lg border border-slate-200">
+                                <strong class="text-slate-900">Incidencia:</strong> ${t.incidencia}
+                            </div>` : ''}
+                        </div>
+
+                        <!-- Botón de Acción -->
+                        <div class="mt-4 pt-3 border-t border-slate-100">
+                            <a href="${castUrl}" class="w-full py-2.5 px-4 rounded-xl bg-[#1e3a8a] hover:bg-[#172554] active:bg-[#0b1a30] text-white font-semibold text-xs flex items-center justify-center gap-2 shadow-sm transition-all">
+                                <span>Abrir CAST (${isLexmark ? 'Lexmark' : 'Multimarca'})</span>
+                                <svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Modal Usuarios (Admin)
+        async function openUsersModal() {
+            document.getElementById('users-modal').classList.remove('hidden');
+            loadAllUsers();
+        }
+        function closeUsersModal() {
+            document.getElementById('users-modal').classList.add('hidden');
+        }
+
+        async function loadAllUsers() {
+            const token = localStorage.getItem('cast_token');
+            try {
+                const res = await fetch('/api/usuarios', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (data.success) {
+                    const tbody = document.getElementById('users-table-body');
+                    tbody.innerHTML = data.usuarios.map(u => `
+                        <tr>
+                            <td class="py-2 px-3 font-mono text-slate-500">${u.id_usuario}</td>
+                            <td class="py-2 px-3 font-bold text-slate-900">${u.nombre}</td>
+                            <td class="py-2 px-3 text-slate-600">${u.correo}</td>
+                            <td class="py-2 px-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${u.id_rol === 1 ? 'bg-slate-900 text-white' : (u.id_rol === 2 ? 'bg-slate-200 text-slate-800 border border-slate-300' : 'bg-slate-100 text-slate-700 border border-slate-300')}">${u.nombre_rol}</span></td>
+                            <td class="py-2 px-3"><span class="text-slate-700 font-semibold">${u.estado}</span></td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        async function submitNewUser(e) {
+            e.preventDefault();
+            const token = localStorage.getItem('cast_token');
+            const data = {
+                nombre: document.getElementById('u-nombre').value.trim(),
+                correo: document.getElementById('u-correo').value.trim(),
+                id_rol: parseInt(document.getElementById('u-rol').value),
+                password: document.getElementById('u-password').value
+            };
+
+            try {
+                const res = await fetch('/api/usuarios', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(data)
+                });
+                const resData = await res.json();
+                if (resData.success) {
+                    showToast('Usuario creado correctamente.');
+                    document.getElementById('create-user-form').reset();
+                    loadAllUsers();
+                    loadTecnicos();
+                } else {
+                    showToast(resData.message || 'Error al crear usuario', true);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error de red al crear usuario', true);
+            }
+        }
+
+        // Gestión de Cambio de Contraseña
+        function openChangePasswordModal() {
+            document.getElementById('change-pwd-form').reset();
+            document.getElementById('change-pwd-modal').classList.remove('hidden');
+            setTimeout(() => document.getElementById('cp-actual').focus(), 50);
+        }
+
+        function closeChangePasswordModal() {
+            document.getElementById('change-pwd-modal').classList.add('hidden');
+        }
+
+        async function submitChangePassword(e) {
+            e.preventDefault();
+            const actual = document.getElementById('cp-actual').value;
+            const nueva = document.getElementById('cp-nueva').value;
+            const confirmar = document.getElementById('cp-confirmar').value;
+
+            if (nueva !== confirmar) {
+                showToast('Las contraseñas nuevas no coinciden.', true);
+                return;
+            }
+
+            if (nueva.length < 4) {
+                showToast('La nueva contraseña debe tener mínimo 4 caracteres.', true);
+                return;
+            }
+
+            const btn = document.getElementById('cp-btn-submit');
+            btn.disabled = true;
+            btn.textContent = 'Actualizando...';
+
+            try {
+                const token = localStorage.getItem('cast_token');
+                const res = await fetch(`${API_BASE}/api/auth/cambiar-password`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ password_actual: actual, password_nuevo: nueva })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message || 'Contraseña actualizada exitosamente.');
+                    closeChangePasswordModal();
+                } else {
+                    showToast(data.message || 'Error al cambiar contraseña.', true);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error de conexión al cambiar contraseña.', true);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Actualizar Contraseña';
+            }
+        }
+
+        // Notificación Toast
+        function showToast(message, isError = false) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `p-3 rounded-xl shadow-lg border text-xs font-semibold flex items-center gap-2 transform transition-all duration-300 translate-y-2 opacity-0 ${
+                isError ? 'bg-rose-900 text-white border-rose-800' : 'bg-slate-900 text-white border-slate-800'
+            }`;
+            toast.innerHTML = `
+                <span>${isError ? '⚠️' : '✅'}</span>
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 10);
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Iniciar verificación
+        checkAuth();
+    </script>
+</body>
+</html>
