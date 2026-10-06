@@ -433,14 +433,38 @@ app.post('/api/tickets', authMiddleware, requireRoles(1, 2), async (req, res) =>
     }
 });
 
-// Asignar o reasignar ticket a un técnico (Administrador y Dispatcher)
+// Asignar, reasignar o desasignar ticket (Administrador y Dispatcher)
 app.put('/api/tickets/:id/asignar', authMiddleware, requireRoles(1, 2), async (req, res) => {
     try {
         const ticketId = req.params.id;
         const { id_usuario_asignado, tipo_formato } = req.body;
 
+        // Si se envía vacío o null, se retira de la bandeja del técnico (vuelve a Pendiente)
         if (!id_usuario_asignado) {
-            return res.status(400).json({ success: false, message: 'Seleccione un técnico válido.' });
+            if (tipo_formato) {
+                await pool.query(
+                    `UPDATE ticket 
+                     SET id_usuario_asignado = NULL, 
+                         tipo_formato = ?,
+                         estado_ticket = 'Pendiente'
+                     WHERE id_ticket = ?`,
+                    [tipo_formato, ticketId]
+                );
+            } else {
+                await pool.query(
+                    `UPDATE ticket 
+                     SET id_usuario_asignado = NULL, 
+                         estado_ticket = 'Pendiente'
+                     WHERE id_ticket = ?`,
+                    [ticketId]
+                );
+            }
+
+            console.log(`ℹ️ Ticket #${ticketId} retirado de la bandeja (Sin Asignar - Pendiente)`);
+            return res.json({
+                success: true,
+                message: 'Ticket retirado de la bandeja del técnico (Estado: Pendiente).'
+            });
         }
 
         // Verificar que el usuario asignado sea técnico activo
@@ -453,15 +477,26 @@ app.put('/api/tickets/:id/asignar', authMiddleware, requireRoles(1, 2), async (r
         }
 
         // Asignar y cambiar automáticamente a 'En Proceso'
-        await pool.query(
-            `UPDATE ticket 
-             SET id_usuario_asignado = ?, 
-                 tipo_formato = COALESCE(?, tipo_formato),
-                 estado_ticket = 'En Proceso'
-             WHERE id_ticket = ?`,
-            [id_usuario_asignado, tipo_formato || null, ticketId]
-        );
+        if (tipo_formato) {
+            await pool.query(
+                `UPDATE ticket 
+                 SET id_usuario_asignado = ?, 
+                     tipo_formato = ?,
+                     estado_ticket = 'En Proceso'
+                 WHERE id_ticket = ?`,
+                [id_usuario_asignado, tipo_formato, ticketId]
+            );
+        } else {
+            await pool.query(
+                `UPDATE ticket 
+                 SET id_usuario_asignado = ?, 
+                     estado_ticket = 'En Proceso'
+                 WHERE id_ticket = ?`,
+                [id_usuario_asignado, ticketId]
+            );
+        }
 
+        console.log(`✅ Ticket #${ticketId} asignado a ${tecnico[0].nombre} (En Proceso)`);
         res.json({
             success: true,
             message: `Ticket asignado a ${tecnico[0].nombre} (Estado: En Proceso).`
