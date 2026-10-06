@@ -630,7 +630,7 @@
                 width: 100% !important;
                 max-width: 100% !important;
                 margin: 0 auto !important;
-                padding: 2mm 6mm !important;
+                padding: 2mm 5mm !important;
                 box-shadow: none !important;
                 border: none !important;
                 border-radius: 0 !important;
@@ -642,12 +642,12 @@
                 break-after: avoid !important;
                 page-break-before: avoid !important;
                 break-before: avoid !important;
-                zoom: 0.85 !important;
+                zoom: 0.81 !important;
             }
 
             @supports not (zoom: 1) {
                 .form-container {
-                    transform: scale(0.85) !important;
+                    transform: scale(0.81) !important;
                     transform-origin: top center !important;
                 }
             }
@@ -655,13 +655,22 @@
             .form-header {
                 margin-bottom: 2px !important;
                 padding-bottom: 2px !important;
+                width: 100% !important;
+            }
+
+            .header-logo-container {
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
 
             .header-logo-container img {
-                max-height: 48px !important;
-                width: auto !important;
+                width: 100% !important;
                 max-width: 100% !important;
-                margin: 0 auto !important;
+                height: auto !important;
+                max-height: none !important;
+                display: block !important;
+                margin: 0 !important;
             }
 
             .form-section {
