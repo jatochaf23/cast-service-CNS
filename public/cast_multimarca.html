@@ -275,42 +275,50 @@
 
         .signature-container {
             border: 1px dashed #cbd5e1;
-            padding: 4px;
-            border-radius: 6px;
-            min-height: 70px;
-            height: 75px;
+            padding: 3px;
+            border-radius: 4px;
+            min-height: 55px;
+            height: auto;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            margin-bottom: 6px;
+            margin-bottom: 3px;
             background-color: #f8fafc;
         }
 
         .signature-container img {
             max-width: 100%;
-            max-height: 65px;
+            max-height: 48px;
             object-fit: contain;
         }
 
         .signature-button {
             background-color: #1e3a8a;
             color: white;
-            padding: 8px 14px;
+            padding: 6px 12px;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             font-weight: 500;
-            transition: background-color 0.2s;
+            font-size: 0.82em;
+            transition: all 0.2s;
         }
 
         .signature-button:hover {
             background-color: #172554;
         }
 
+        .signature-button.signed {
+            background-color: #15803d;
+            font-size: 0.76em;
+            padding: 3px 8px;
+            margin-top: 3px;
+        }
+
         .signature-area label {
             display: block;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .form-actions {
@@ -600,11 +608,11 @@
 
             html, body {
                 width: 100% !important;
-                height: 100% !important;
+                min-height: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 background: #ffffff !important;
-                overflow: hidden !important;
+                overflow: visible !important;
             }
 
             .form-actions,
@@ -621,7 +629,7 @@
                 width: 100% !important;
                 max-width: 100% !important;
                 margin: 0 !important;
-                padding: 5mm 8mm !important;
+                padding: 3mm 7mm 2mm 7mm !important;
                 box-shadow: none !important;
                 border: none !important;
                 border-radius: 0 !important;
@@ -634,26 +642,26 @@
             }
 
             .form-header {
-                margin-bottom: 4px !important;
-                padding-bottom: 3px !important;
+                margin-bottom: 2px !important;
+                padding-bottom: 2px !important;
             }
 
             .form-section {
-                margin-bottom: 4px !important;
-                padding: 4px 6px !important;
+                margin-bottom: 2px !important;
+                padding: 3px 5px !important;
                 border: 1px solid #cbd5e1 !important;
-                border-radius: 4px !important;
+                border-radius: 3px !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
             }
 
             .form-section h3 {
-                margin: 1px 0 3px 0 !important;
-                font-size: 0.88em !important;
+                margin: 0 0 2px 0 !important;
+                font-size: 0.85em !important;
             }
 
             label {
-                font-size: 0.78em !important;
+                font-size: 0.76em !important;
                 margin-bottom: 1px !important;
             }
 
@@ -661,7 +669,7 @@
             input[type="date"],
             input[type="time"],
             textarea {
-                font-size: 0.78em !important;
+                font-size: 0.76em !important;
                 padding: 2px 4px !important;
                 border: 1px solid #94a3b8 !important;
                 border-radius: 3px !important;
@@ -670,21 +678,36 @@
 
             textarea {
                 resize: none !important;
-                height: 30px !important;
-            }
-
-            .signature-container {
-                min-height: 50px !important;
-                height: 55px !important;
-                border: 1px dashed #94a3b8 !important;
-            }
-
-            .signature-container img {
-                max-height: 48px !important;
+                height: 25px !important;
             }
 
             .signature-section {
-                margin-top: 4px !important;
+                margin-top: 2px !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+
+            .signature-container {
+                min-height: 48px !important;
+                height: 52px !important;
+                border: 1px dashed #94a3b8 !important;
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+                margin-bottom: 2px !important;
+            }
+
+            .signature-container img {
+                display: block !important;
+                max-height: 48px !important;
+                max-width: 95% !important;
+                margin: 0 auto !important;
+                object-fit: contain !important;
+            }
+
+            .signature-container img:not([src]),
+            .signature-container img[src=""] {
+                display: none !important;
             }
         }
     </style>
@@ -878,7 +901,6 @@
                         <img id="sig-repc-img" src="" alt="Firma Rep. Tec." style="display: none;">
                         <button type="button" class="signature-button" data-target="sig-repc-modal" id="sig-repc-btn">✍️ Firmar Rep. Técnico</button>
                     </div>
-                    <span id="sig-repc-badge" class="signature-status-badge pending">Pendiente</span>
                     <label for="rep-tecnico-nombre">Rep. Tec:</label>
                     <input type="text" id="rep-tecnico-nombre" name="rep-tecnico-nombre">
                 </div>
@@ -887,7 +909,6 @@
                         <img id="sig-user-img" src="" alt="Firma Usuario" style="display: none;">
                         <button type="button" class="signature-button" data-target="sig-user-modal" id="sig-user-btn">✍️ Firmar Cliente / Usuario</button>
                     </div>
-                    <span id="sig-user-badge" class="signature-status-badge pending">Pendiente</span>
                     <label for="usuario-nombre">Usuario:</label>
                     <input type="text" id="usuario-nombre" name="usuario-nombre">
                 </div>
@@ -909,7 +930,7 @@
             <p class="signature-guideline">Dibuje su firma en el recuadro utilizando el mouse o el dedo.</p>
             <div class="modal-actions">
                 <button type="button" class="clear-button" data-target="sig-repc-canvas">🗑️ Limpiar</button>
-                <button type="button" class="save-button" data-target-canvas="sig-repc-canvas" data-target-img="sig-repc-img" data-target-modal="sig-repc-modal" data-badge="sig-repc-badge" data-btn="sig-repc-btn">💾 Guardar Firma</button>
+                <button type="button" class="save-button" data-target-canvas="sig-repc-canvas" data-target-img="sig-repc-img" data-target-modal="sig-repc-modal" data-btn="sig-repc-btn">💾 Guardar Firma</button>
             </div>
         </div>
     </div>
@@ -922,7 +943,7 @@
             <p class="signature-guideline">Dibuje su firma en el recuadro utilizando el mouse o el dedo.</p>
             <div class="modal-actions">
                 <button type="button" class="clear-button" data-target="sig-user-canvas">🗑️ Limpiar</button>
-                <button type="button" class="save-button" data-target-canvas="sig-user-canvas" data-target-img="sig-user-img" data-target-modal="sig-user-modal" data-badge="sig-user-badge" data-btn="sig-user-btn">💾 Guardar Firma</button>
+                <button type="button" class="save-button" data-target-canvas="sig-user-canvas" data-target-img="sig-user-img" data-target-modal="sig-user-modal" data-btn="sig-user-btn">💾 Guardar Firma</button>
             </div>
         </div>
     </div>
@@ -1022,7 +1043,6 @@
                     const canvas = document.getElementById(button.dataset.targetCanvas);
                     const img = document.getElementById(button.dataset.targetImg);
                     const modal = document.getElementById(button.dataset.targetModal);
-                    const badge = document.getElementById(button.dataset.badge);
                     const btn = document.getElementById(button.dataset.btn);
 
                     if (isCanvasBlank(canvas)) {
@@ -1034,14 +1054,9 @@
                     img.style.display = 'block';
                     modal.style.display = 'none';
 
-                    if (badge) {
-                        badge.textContent = 'Firmado ✔';
-                        badge.classList.remove('pending');
-                        badge.classList.add('signed');
-                    }
-
                     if (btn) {
                         btn.textContent = '✏️ Modificar Firma';
+                        btn.classList.add('signed');
                     }
                 });
             });
