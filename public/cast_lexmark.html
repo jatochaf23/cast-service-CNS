@@ -599,25 +599,26 @@
             }
         }
 
-        /* Configuración de Impresión: Sin Encabezado/Pie de página del navegador y exactamente 1 página por CAST Lexmark */
+        /* Configuración de Impresión: Exactamente 1 página A4 ajustada */
         @media print {
             @page {
                 size: A4 portrait;
-                margin: 0;
+                margin: 0mm;
             }
 
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
+                box-sizing: border-box !important;
             }
 
             html, body {
                 width: 100% !important;
-                min-height: 100% !important;
+                height: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
                 background: #ffffff !important;
-                overflow: visible !important;
+                overflow: hidden !important;
             }
 
             .form-actions,
@@ -633,8 +634,8 @@
             .form-container {
                 width: 100% !important;
                 max-width: 100% !important;
-                margin: 0 !important;
-                padding: 3mm 7mm 2mm 7mm !important;
+                margin: 0 auto !important;
+                padding: 2mm 6mm !important;
                 box-shadow: none !important;
                 border: none !important;
                 border-radius: 0 !important;
@@ -644,6 +645,16 @@
                 break-inside: avoid !important;
                 page-break-after: avoid !important;
                 break-after: avoid !important;
+                page-break-before: avoid !important;
+                break-before: avoid !important;
+                zoom: 0.85 !important;
+            }
+
+            @supports not (zoom: 1) {
+                .form-container {
+                    transform: scale(0.85) !important;
+                    transform-origin: top center !important;
+                }
             }
 
             .form-header {
@@ -651,9 +662,16 @@
                 padding-bottom: 2px !important;
             }
 
+            .header-logo-container img {
+                max-height: 48px !important;
+                width: auto !important;
+                max-width: 100% !important;
+                margin: 0 auto !important;
+            }
+
             .form-section {
                 margin-bottom: 2px !important;
-                padding: 3px 5px !important;
+                padding: 2px 4px !important;
                 border: 1px solid #cbd5e1 !important;
                 border-radius: 3px !important;
                 page-break-inside: avoid !important;
@@ -661,29 +679,29 @@
             }
 
             .form-section h3 {
-                margin: 0 0 2px 0 !important;
-                font-size: 0.85em !important;
+                margin: 0 0 1px 0 !important;
+                font-size: 0.82em !important;
             }
 
             label {
-                font-size: 0.76em !important;
-                margin-bottom: 1px !important;
+                font-size: 0.74em !important;
+                margin-bottom: 0px !important;
             }
 
             input[type="text"],
             input[type="date"],
             input[type="time"],
             textarea {
-                font-size: 0.76em !important;
-                padding: 2px 4px !important;
+                font-size: 0.74em !important;
+                padding: 1px 3px !important;
                 border: 1px solid #94a3b8 !important;
-                border-radius: 3px !important;
+                border-radius: 2px !important;
                 background-color: #ffffff !important;
             }
 
             textarea {
                 resize: none !important;
-                height: 25px !important;
+                height: 22px !important;
             }
 
             .signature-section {
@@ -693,18 +711,18 @@
             }
 
             .signature-container {
-                min-height: 48px !important;
-                height: 52px !important;
+                min-height: 44px !important;
+                height: 48px !important;
                 border: 1px dashed #94a3b8 !important;
                 display: flex !important;
                 justify-content: center !important;
                 align-items: center !important;
-                margin-bottom: 2px !important;
+                margin-bottom: 1px !important;
             }
 
             .signature-container img {
                 display: block !important;
-                max-height: 48px !important;
+                max-height: 44px !important;
                 max-width: 95% !important;
                 margin: 0 auto !important;
                 object-fit: contain !important;
