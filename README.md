@@ -1,6 +1,6 @@
-# Sistema CAST (Constancia de Atención Servicio Técnico) - CNS
+# cast-service-CNS
 
-Plataforma web para la gestión, asignación y emisión de Constancias de Atención de Servicio Técnico (**CAST Multimarca** y **CAST Lexmark**) con backend en **Node.js + Express** y base de datos relacional **MySQL / TiDB**.
+Plataforma web para la gestión, asignación y emisión de Constancias de Atención de Servicio Técnico (**CAST Multimarca** y **CAST Lexmark**) con backend en **Node.js + Express** y base de datos relacional PostgreSQL / Supabase.
 
 ---
 
@@ -14,15 +14,15 @@ Plataforma web para la gestión, asignación y emisión de Constancias de Atenci
   - **CAST Multimarca**: Laptops, desktops, servidores y periféricos.
   - **CAST Lexmark**: Impresoras y multifuncionales especializadas.
 - **Firma Digital & PDF**: Captura táctil/mouse de firmas y generación de PDF A4 en alta fidelidad.
-- **Preparado para la nube**: Compatible con **TiDB Serverless**, **Vercel**, **Railway** y servidores locales.
+- **Preparado para la nube**: Compatible con **Vercel** y **Supabase**.
 
 ---
 
 ## 🛠️ Tecnologías
 
-- **Backend**: Node.js, Express, MySQL2, JWT (jsonwebtoken), bcryptjs, CORS, cookie-parser.
+- **Backend**: Node.js, Express, pg (PostgreSQL), JWT (jsonwebtoken), bcryptjs, CORS, cookie-parser.
 - **Frontend**: HTML5, Tailwind CSS, JavaScript (ES6+), Signature Pad, jsPDF, html2canvas.
-- **Base de Datos**: MySQL / TiDB.
+- **Base de Datos**: Supabase PostgreSQL.
 
 ---
 
@@ -30,8 +30,8 @@ Plataforma web para la gestión, asignación y emisión de Constancias de Atenci
 
 1. **Clonar el repositorio:**
    ```bash
-   git clone https://github.com/malsteen23-netizen/cast-service.git
-   cd cast-service
+   git clone https://github.com/jatochaf23/cast-service-CNS.git
+   cd cast-service-CNS
    ```
 
 2. **Instalar dependencias:**
@@ -40,14 +40,10 @@ Plataforma web para la gestión, asignación y emisión de Constancias de Atenci
    ```
 
 3. **Configurar variables de entorno:**
-   Copia el archivo `.env.example` a `.env` y configura tus credenciales de base de datos:
+   Copia el archivo `.env.example` a `.env` y configura tus credenciales de Supabase:
    ```env
    PORT=3000
-   DB_HOST=localhost
-   DB_PORT=3306
-   DB_USER=root
-   DB_PASSWORD=tu_password
-   DB_NAME=cast_db
+   DATABASE_URL=tu_cadena_de_conexion_supabase
    JWT_SECRET=tu_clave_secreta_jwt
    ```
 
@@ -64,8 +60,11 @@ Plataforma web para la gestión, asignación y emisión de Constancias de Atenci
 ```text
 cast-service/
 ├── auth.js               # Middleware de autenticación y verificación de roles JWT
-├── db.js                 # Pool de conexiones MySQL / TiDB e inicialización
+├── db.js                 # Pool de conexiones PostgreSQL (Supabase)
 ├── server.js             # API REST (rutas de autenticación, usuarios y tickets)
+├── vercel.json           # Configuración serverless para Vercel
+├── api/
+│   └── index.js          # Entrypoint de Vercel
 ├── public/               # Frontend estático (vistas, scripts y assets)
 │   ├── index.html        # Portal principal y paneles según rol
 │   ├── login.html        # Inicio de sesión con accesos rápidos
