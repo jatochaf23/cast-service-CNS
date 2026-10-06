@@ -38,13 +38,20 @@
 
         .header-logo-container {
             width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 4px;
         }
 
         .header-logo-container img {
             width: 100%;
-            max-width: 100%;
+            max-width: 480px;
+            max-height: 80px;
             height: auto;
+            object-fit: contain;
             display: block;
+            margin: 0 auto;
         }
 
         .header-bottom {
@@ -665,17 +672,21 @@
 
             .header-logo-container {
                 width: 100% !important;
-                margin: 0 !important;
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+                margin: 0 auto 2px auto !important;
                 padding: 0 !important;
             }
 
             .header-logo-container img {
-                width: 100% !important;
-                max-width: 100% !important;
+                max-width: 440px !important;
+                max-height: 65px !important;
+                width: auto !important;
                 height: auto !important;
-                max-height: none !important;
                 display: block !important;
-                margin: 0 !important;
+                margin: 0 auto !important;
+                object-fit: contain !important;
             }
 
             .form-section {
@@ -943,7 +954,6 @@
             </div>
             <div class="form-actions">
                 <button type="submit">📄 Generar y Descargar PDF</button>
-                <button type="button" onclick="window.print()" class="print-button">🖨️ Imprimir Constancia</button>
             </div>
         </form>
     </div>
