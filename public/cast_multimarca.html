@@ -1199,7 +1199,7 @@
                 const formContainer = document.querySelector('.form-container');
 
                 html2canvas(formContainer, {
-                    scale: 2,
+                    scale: 1.8,
                     useCORS: true,
                     backgroundColor: '#ffffff',
                     windowWidth: 1024,
@@ -1255,12 +1255,13 @@
                     }
                 }).then(canvas => {
                     const { jsPDF } = window.jspdf;
-                    const imgData = canvas.toDataURL('image/png');
+                    const imgData = canvas.toDataURL('image/jpeg', 0.82);
 
                     const pdf = new jsPDF({
                         orientation: 'portrait',
                         unit: 'mm',
-                        format: 'a4'
+                        format: 'a4',
+                        compress: true
                     });
 
                     const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -1282,7 +1283,7 @@
                     const xPos = (pdfWidth - finalWidth) / 2;
                     const yPos = (pdfHeight - finalHeight) / 2;
 
-                    pdf.addImage(imgData, 'PNG', xPos, yPos, finalWidth, finalHeight);
+                    pdf.addImage(imgData, 'JPEG', xPos, yPos, finalWidth, finalHeight, undefined, 'FAST');
 
                     const numPadded = String(currentCorrelativo).padStart(7, '0');
                     pdf.save(`CAST${numPadded}.pdf`);
