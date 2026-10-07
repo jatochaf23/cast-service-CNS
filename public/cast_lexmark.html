@@ -271,6 +271,11 @@
             resize: vertical;
         }
 
+        textarea#actividad-realizada {
+            height: auto;
+            min-height: 70px;
+        }
+
         .signature-section {
             display: flex;
             justify-content: space-around;
@@ -724,6 +729,28 @@
                 height: 22px !important;
             }
 
+            textarea#actividad-realizada {
+                resize: none !important;
+                height: auto !important;
+                min-height: 55px !important;
+            }
+
+            .parts-grid-tripled.all-empty-parts {
+                display: none !important;
+            }
+
+            .parts-pair.empty-part {
+                display: none !important;
+            }
+
+            .parts-col-header.empty-header {
+                display: none !important;
+            }
+
+            .parts-grid-tripled.single-col-parts {
+                grid-template-columns: 1fr !important;
+            }
+
             .signature-section {
                 margin-top: 2px !important;
                 page-break-inside: avoid !important;
@@ -851,7 +878,7 @@
                 <textarea id="falla-real" name="falla-real" rows="2"></textarea>
 
                 <label for="actividad-realizada">Actividad realizada:</label>
-                <textarea id="actividad-realizada" name="actividad-realizada" rows="2"></textarea>
+                <textarea id="actividad-realizada" name="actividad-realizada" rows="3"></textarea>
             </div>
             <div class="form-section">
                 <div class="parts-header">
@@ -1231,6 +1258,66 @@
                 }
             });
 
+            // Sincronización de partes utilizadas y auto-check "Si"
+            const partInputs = document.querySelectorAll('input[name^="parte-cant-"], input[name^="parte-desc-"]');
+            partInputs.forEach(input => {
+                input.addEventListener('input', () => {
+                    const hasVal = Array.from(partInputs).some(inp => inp.value.trim() !== '');
+                    const radioSi = document.querySelector('input[name="utilizacion-partes"][value="si"]');
+                    const radioNo = document.querySelector('input[name="utilizacion-partes"][value="no"]');
+                    if (hasVal && radioSi) {
+                        radioSi.checked = true;
+                    } else if (!hasVal && radioNo && !radioSi.checked) {
+                        radioNo.checked = true;
+                    }
+                });
+            });
+
+            function updatePartsPrintClasses() {
+                const pairs = document.querySelectorAll('.parts-pair');
+                let filledCount = 0;
+                pairs.forEach(pair => {
+                    const cant = pair.querySelector('input[name^="parte-cant"]')?.value.trim();
+                    const desc = pair.querySelector('input[name^="parte-desc"]')?.value.trim();
+                    if (!cant && !desc) {
+                        pair.classList.add('empty-part');
+                    } else {
+                        pair.classList.remove('empty-part');
+                        filledCount++;
+                    }
+                });
+
+                const grid = document.querySelector('.parts-grid-tripled');
+                const radioNo = document.querySelector('input[name="utilizacion-partes"][value="no"]');
+                if (grid) {
+                    if (filledCount === 0 || (radioNo && radioNo.checked && filledCount === 0)) {
+                        grid.classList.add('all-empty-parts');
+                    } else {
+                        grid.classList.remove('all-empty-parts');
+                        const headers = grid.querySelectorAll('.parts-col-header');
+                        if (filledCount <= 3) {
+                            grid.classList.add('single-col-parts');
+                            if (headers[1]) headers[1].classList.add('empty-header');
+                            if (headers[2]) headers[2].classList.add('empty-header');
+                        } else {
+                            grid.classList.remove('single-col-parts');
+                            if (headers[1]) headers[1].classList.remove('empty-header');
+                            if (headers[2]) headers[2].classList.remove('empty-header');
+                        }
+                    }
+                }
+            }
+
+            window.addEventListener('beforeprint', updatePartsPrintClasses);
+            window.addEventListener('afterprint', () => {
+                document.querySelectorAll('.parts-pair.empty-part').forEach(p => p.classList.remove('empty-part'));
+                const grid = document.querySelector('.parts-grid-tripled');
+                if (grid) {
+                    grid.classList.remove('all-empty-parts', 'single-col-parts');
+                    grid.querySelectorAll('.parts-col-header').forEach(h => h.classList.remove('empty-header'));
+                }
+            });
+
             form.addEventListener('submit', function (event) {
                 event.preventDefault();
 
@@ -1252,9 +1339,99 @@
                         const clonedForm = clonedDoc.querySelector('#tech-service-form');
                         if (!clonedForm) return;
 
+                        // 1. Procesar Utilización de Partes: renderizar solo las usadas o contraer si no hay
+                        const filledParts = [];
+                        for (let i = 1; i <= 6; i++) {
+                            const cantVal = (form.querySelector(`[name="parte-cant-${i}"]`)?.value || '').trim();
+                            const descVal = (form.querySelector(`[name="parte-desc-${i}"]`)?.value || '').trim();
+                            if (cantVal || descVal) {
+                                filledParts.push({ cant: cantVal, desc: descVal });
+                            }
+                        }
+
+                        const clonedPartsGrid = clonedForm.querySelector('.parts-grid-tripled');
+                        if (clonedPartsGrid) {
+                            if (filledParts.length === 0) {
+                                clonedPartsGrid.style.display = 'none';
+                                const radioNo = clonedForm.querySelector('input[name="utilizacion-partes"][value="no"]');
+                                const radioSi = clonedForm.querySelector('input[name="utilizacion-partes"][value="si"]');
+                                if (!radioSi?.checked && radioNo) {
+                                    radioNo.checked = true;
+                                    radioNo.setAttribute('checked', 'checked');
+                                }
+                            } else {
+                                const radioSi = clonedForm.querySelector('input[name="utilizacion-partes"][value="si"]');
+                                const radioNo = clonedForm.querySelector('input[name="utilizacion-partes"][value="no"]');
+                                if (radioSi) {
+                                    radioSi.checked = true;
+                                    radioSi.setAttribute('checked', 'checked');
+                                }
+                                if (radioNo) {
+                                    radioNo.checked = false;
+                                    radioNo.removeAttribute('checked');
+                                }
+
+                                clonedPartsGrid.innerHTML = '';
+                                const numCols = filledParts.length >= 4 ? 2 : 1;
+                                clonedPartsGrid.style.display = 'grid';
+                                clonedPartsGrid.style.gridTemplateColumns = numCols === 2 ? 'repeat(2, 1fr)' : '1fr';
+                                clonedPartsGrid.style.gap = '3px 12px';
+
+                                for (let c = 0; c < numCols; c++) {
+                                    const head = clonedDoc.createElement('div');
+                                    head.className = 'parts-col-header';
+                                    head.style.display = 'grid';
+                                    head.style.gridTemplateColumns = '50px 1fr';
+                                    head.style.gap = '4px';
+                                    head.style.fontSize = '10px';
+                                    head.style.fontWeight = 'bold';
+                                    head.style.color = '#475569';
+                                    head.innerHTML = '<span>Cant.</span><span>Código / Descripción</span>';
+                                    clonedPartsGrid.appendChild(head);
+                                }
+
+                                filledParts.forEach(p => {
+                                    const pair = clonedDoc.createElement('div');
+                                    pair.className = 'parts-pair';
+                                    pair.style.display = 'grid';
+                                    pair.style.gridTemplateColumns = '50px 1fr';
+                                    pair.style.gap = '4px';
+
+                                    const cantBox = clonedDoc.createElement('div');
+                                    cantBox.style.border = '1px solid #cbd5e1';
+                                    cantBox.style.borderRadius = '3px';
+                                    cantBox.style.padding = '2px 4px';
+                                    cantBox.style.fontSize = '11px';
+                                    cantBox.style.textAlign = 'center';
+                                    cantBox.style.backgroundColor = '#ffffff';
+                                    cantBox.textContent = p.cant;
+
+                                    const descBox = clonedDoc.createElement('div');
+                                    descBox.style.border = '1px solid #cbd5e1';
+                                    descBox.style.borderRadius = '3px';
+                                    descBox.style.padding = '2px 6px';
+                                    descBox.style.fontSize = '11px';
+                                    descBox.style.backgroundColor = '#ffffff';
+                                    descBox.style.whiteSpace = 'pre-wrap';
+                                    descBox.style.wordBreak = 'break-word';
+                                    descBox.textContent = p.desc;
+
+                                    pair.appendChild(cantBox);
+                                    pair.appendChild(descBox);
+                                    clonedPartsGrid.appendChild(pair);
+                                });
+                            }
+                        }
+
+                        // 2. Reemplazar inputs restantes y textareas con divs estilizados
                         const originalInputs = form.querySelectorAll('input, textarea, select');
                         originalInputs.forEach(input => {
                             if (input.name) {
+                                // Omitir partes ya que fueron procesadas arriba
+                                if (input.name.startsWith('parte-cant-') || input.name.startsWith('parte-desc-')) {
+                                    return;
+                                }
+
                                 if (input.type === 'radio' || input.type === 'checkbox') {
                                     const clonedInput = clonedForm.querySelector(`[name="${CSS.escape(input.name)}"][value="${CSS.escape(input.value)}"]`);
                                     if (clonedInput) {
@@ -1270,14 +1447,15 @@
                                     if (clonedInput) {
                                         const val = input.value || '';
                                         const isTextarea = input.tagName.toLowerCase() === 'textarea';
+                                        const isActividad = input.id === 'actividad-realizada' || input.name === 'actividad-realizada';
                                         
                                         const textDiv = clonedDoc.createElement('div');
                                         textDiv.style.width = '100%';
-                                        textDiv.style.minHeight = isTextarea ? '28px' : '20px';
+                                        textDiv.style.minHeight = isActividad ? '65px' : (isTextarea ? '28px' : '20px');
                                         textDiv.style.maxHeight = 'none';
                                         textDiv.style.border = '1px solid #cbd5e1';
                                         textDiv.style.borderRadius = '4px';
-                                        textDiv.style.padding = '2px 5px';
+                                        textDiv.style.padding = isActividad ? '3px 6px' : '2px 5px';
                                         textDiv.style.fontSize = '11px';
                                         textDiv.style.lineHeight = '1.3';
                                         textDiv.style.color = '#0f172a';
