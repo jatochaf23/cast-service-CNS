@@ -684,6 +684,66 @@ app.put('/api/tickets/:id/completar', async (req, res) => {
 });
 
 // ==========================================
+// ELIMINACIÓN DE TICKETS ATENDIDOS
+// ==========================================
+
+// Eliminar todos los tickets atendidos en masa (Administrador y Dispatcher)
+app.delete('/api/tickets/bulk/atendidos', authMiddleware, requireRoles(1, 2), async (req, res) => {
+    try {
+        const [atendidos] = await pool.query("SELECT id_ticket, numero_ticket FROM ticket WHERE estado_ticket = 'Atendido'");
+        if (atendidos.length === 0) {
+            return res.status(400).json({ success: false, message: 'No hay tickets con estado "Atendido" para eliminar.' });
+        }
+
+        const count = atendidos.length;
+        await pool.query("DELETE FROM ticket WHERE estado_ticket = 'Atendido'");
+        console.log(`🗑️ Se eliminaron ${count} tickets atendidos de la base de datos.`);
+
+        res.json({
+            success: true,
+            message: `Se eliminaron ${count} tickets atendidos exitosamente.`,
+            count
+        });
+    } catch (err) {
+        console.error('Error al eliminar tickets atendidos en lote:', err);
+        res.status(500).json({ success: false, message: 'Error interno al eliminar los tickets atendidos.' });
+    }
+});
+
+// Eliminar un ticket individual atendido (Administrador y Dispatcher)
+app.delete('/api/tickets/:id', authMiddleware, requireRoles(1, 2), async (req, res) => {
+    try {
+        const ticketId = req.params.id;
+
+        const [rows] = await pool.query('SELECT id_ticket, numero_ticket, estado_ticket FROM ticket WHERE id_ticket = ?', [ticketId]);
+        if (rows.length === 0) {
+            return res.status(404).json({ success: false, message: 'Ticket no encontrado.' });
+        }
+
+        const ticket = rows[0];
+
+        // Validar que el ticket esté atendido
+        if (ticket.estado_ticket !== 'Atendido') {
+            return res.status(400).json({
+                success: false,
+                message: `Solo se pueden eliminar tickets con estado "Atendido". Este ticket se encuentra en "${ticket.estado_ticket}".`
+            });
+        }
+
+        await pool.query('DELETE FROM ticket WHERE id_ticket = ?', [ticketId]);
+        console.log(`🗑️ Ticket #${ticket.numero_ticket} (ID: ${ticketId}) eliminado correctamente.`);
+
+        res.json({
+            success: true,
+            message: `Ticket '${ticket.numero_ticket}' eliminado exitosamente.`
+        });
+    } catch (err) {
+        console.error('Error al eliminar ticket:', err);
+        res.status(500).json({ success: false, message: 'Error interno al eliminar ticket.' });
+    }
+});
+
+// ==========================================
 // REPORTE DIARIO DE SALIDAS A SERVICIO (DASHBOARD)
 // ==========================================
 app.get('/api/dashboard/salidas', authMiddleware, async (req, res) => {

@@ -229,6 +229,10 @@
                         <button onclick="setFilter('Pendiente')" id="filter-Pendiente" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 hover:bg-blue-50/60 hover:text-blue-900 border border-slate-200 whitespace-nowrap">Pendientes</button>
                         <button onclick="setFilter('En Proceso')" id="filter-En Proceso" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 hover:bg-blue-50/60 hover:text-blue-900 border border-slate-200 whitespace-nowrap">En Proceso</button>
                         <button onclick="setFilter('Atendido')" id="filter-Atendido" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 hover:bg-blue-50/60 hover:text-blue-900 border border-slate-200 whitespace-nowrap">Atendidos</button>
+                        <button onclick="confirmDeleteAllAtendidos()" id="btn-clean-atendidos" class="hidden px-2.5 py-1.5 rounded-lg text-xs font-bold bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-700 border border-rose-200 items-center gap-1.5 transition-all shadow-xs whitespace-nowrap ml-1" title="Eliminar todos los tickets que ya fueron atendidos">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                            <span>Limpiar Atendidos</span>
+                        </button>
                     </div>
                     <div class="relative w-full sm:w-72">
                         <input type="text" id="search-input" onkeyup="renderTicketsTable()" placeholder="Buscar por ticket, cliente o serie..."
@@ -864,6 +868,35 @@
         </div>
     </div>
 
+    <!-- MODAL: CONFIRMAR ELIMINACIÓN DE TICKET ATENDIDO -->
+    <div id="delete-ticket-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 flex flex-col">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </div>
+                <div>
+                    <h3 id="delete-modal-title" class="text-base font-bold text-slate-900 leading-tight">Eliminar Ticket Atendido</h3>
+                    <p class="text-xs text-slate-500">Esta acción no se puede deshacer</p>
+                </div>
+            </div>
+
+            <div id="delete-modal-message" class="text-xs text-slate-600 leading-relaxed mb-5 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                ¿Está seguro de eliminar el ticket de la bandeja?
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                <button type="button" onclick="closeDeleteTicketModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
+                    Cancelar
+                </button>
+                <button type="button" id="delete-modal-confirm-btn" onclick="executeDeleteTicket()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white text-xs font-bold rounded-xl transition-colors shadow-sm flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    <span>Eliminar</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const API_BASE = (window.location.origin && window.location.origin.startsWith('http')) ? '' : 'http://localhost:3000';
         let currentUser = null;
@@ -1104,6 +1137,17 @@
             document.getElementById('stat-pendientes').textContent = pendientes;
             document.getElementById('stat-proceso').textContent = proceso;
             document.getElementById('stat-atendidos').textContent = atendidos;
+
+            const btnClean = document.getElementById('btn-clean-atendidos');
+            if (btnClean) {
+                if (atendidos > 0 && currentUser && (currentUser.id_rol === 1 || currentUser.id_rol === 2)) {
+                    btnClean.classList.remove('hidden');
+                    btnClean.classList.add('inline-flex');
+                } else {
+                    btnClean.classList.add('hidden');
+                    btnClean.classList.remove('inline-flex');
+                }
+            }
         }
 
         function setFilter(filter) {
@@ -1142,7 +1186,7 @@
             }
 
             if (filtered.length === 0) {
-                if (tbody) tbody.innerHTML = `<tr><td colspan="8" class="text-center py-8 text-slate-400">No se encontraron tickets con los criterios seleccionados.</td></tr>`;
+                if (tbody) tbody.innerHTML = `<tr><td colspan="9" class="text-center py-8 text-slate-400">No se encontraron tickets con los criterios seleccionados.</td></tr>`;
                 if (mobileContainer) mobileContainer.innerHTML = `<div class="text-center py-8 text-slate-400 bg-white rounded-2xl border border-slate-200 p-4">No se encontraron tickets con los criterios seleccionados.</div>`;
                 return;
             }
@@ -1229,6 +1273,14 @@
                                         class="p-1 rounded-md text-slate-600 hover:text-[#1e3a8a] hover:bg-blue-50 border border-slate-200 transition-colors" title="Editar / Reprogramar Ticket">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                     </button>
+                                    ${t.estado_ticket === 'Atendido' ? `
+                                        <button onclick="confirmDeleteTicket(${t.id_ticket}, '${t.numero_ticket}')"
+                                            class="p-1 rounded-md text-rose-600 hover:text-white hover:bg-rose-600 border border-rose-200 transition-colors shadow-xs" title="Eliminar Ticket Atendido">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                            </svg>
+                                        </button>
+                                    ` : ''}
                                 </div>
                             </td>
                         </tr>
@@ -1326,10 +1378,90 @@
                                     class="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs flex items-center justify-center border border-slate-200 transition-colors" title="Editar">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                 </button>
+                                ${t.estado_ticket === 'Atendido' ? `
+                                    <button onclick="confirmDeleteTicket(${t.id_ticket}, '${t.numero_ticket}')" 
+                                        class="py-2.5 px-3 rounded-xl bg-rose-50 hover:bg-rose-600 hover:text-white text-rose-600 font-semibold text-xs flex items-center justify-center border border-rose-200 transition-colors shadow-xs" title="Eliminar Ticket Atendido">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                    </button>
+                                ` : ''}
                             </div>
                         </div>
                     `;
                 }).join('');
+            }
+        }
+
+        // ==========================================
+        // GESTIÓN DE ELIMINACIÓN DE TICKETS ATENDIDOS
+        // ==========================================
+        let pendingDeleteTicketId = null;
+        let isBulkDelete = false;
+
+        function confirmDeleteTicket(ticketId, ticketNum) {
+            pendingDeleteTicketId = ticketId;
+            isBulkDelete = false;
+            document.getElementById('delete-modal-title').textContent = 'Eliminar Ticket Atendido';
+            document.getElementById('delete-modal-message').innerHTML = `¿Está seguro de eliminar el ticket atendido <span class="font-bold text-[#1e3a8a] font-mono">${ticketNum}</span> de la bandeja? Esta acción borrará el registro de la base de datos de manera definitiva.`;
+            document.getElementById('delete-ticket-modal').classList.remove('hidden');
+        }
+
+        function confirmDeleteAllAtendidos() {
+            pendingDeleteTicketId = null;
+            isBulkDelete = true;
+            const count = allTickets.filter(t => t.estado_ticket === 'Atendido').length;
+            document.getElementById('delete-modal-title').textContent = 'Limpiar Tickets Atendidos';
+            document.getElementById('delete-modal-message').innerHTML = `¿Está seguro de eliminar <strong>todos los ${count} tickets atendidos</strong> de la bandeja? Esta acción borrará los registros completados de forma permanente.`;
+            document.getElementById('delete-ticket-modal').classList.remove('hidden');
+        }
+
+        function closeDeleteTicketModal() {
+            document.getElementById('delete-ticket-modal').classList.add('hidden');
+            pendingDeleteTicketId = null;
+            isBulkDelete = false;
+        }
+
+        async function executeDeleteTicket() {
+            const token = localStorage.getItem('cast_token');
+            const confirmBtn = document.getElementById('delete-modal-confirm-btn');
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = 'Eliminando...';
+
+            try {
+                let url = `${API_BASE}/api/tickets/${pendingDeleteTicketId}`;
+                if (isBulkDelete) {
+                    url = `${API_BASE}/api/tickets/bulk/atendidos`;
+                }
+
+                const res = await fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    showToast(data.message);
+                    closeDeleteTicketModal();
+                    await loadTickets();
+                    const dashTab = document.getElementById('section-dashboard-tab');
+                    if (dashTab && !dashTab.classList.contains('hidden')) {
+                        loadDashboardSalidas();
+                    }
+                } else {
+                    showToast(data.message || 'Error al eliminar', true);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error de conexión al eliminar ticket.', true);
+            } finally {
+                confirmBtn.disabled = false;
+                confirmBtn.innerHTML = `
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    <span>Eliminar</span>
+                `;
             }
         }
 
