@@ -337,14 +337,46 @@
             }
         }
 
-        // 10. Requerimiento (marca la casilla)
-        if (ticket.requerimiento) {
-            setCheckbox('tipo_servicio', 'requerimiento', true);
+        // 10. Tipo de servicio automático (Incidencia, Requerimiento, Mantenimiento, etc.)
+        if (ticket.tipo_servicio) {
+            const tipoLower = ticket.tipo_servicio.toLowerCase();
+            if (tipoLower.includes('inciden') || tipoLower.includes('fall')) {
+                setCheckbox('tipo_servicio', 'incidencia', true);
+            }
+            if (tipoLower.includes('requerim')) {
+                setCheckbox('tipo_servicio', 'requerimiento', true);
+            }
+            if (tipoLower.includes('mantenim')) {
+                setCheckbox('tipo_servicio', 'mantenimiento', true);
+            }
+            if (tipoLower.includes('contrat')) {
+                setCheckbox('tipo_servicio', 'contrato', true);
+            }
+            if (tipoLower.includes('garant')) {
+                setCheckbox('tipo_servicio', 'garantia', true);
+            }
+            if (tipoLower.includes('otro')) {
+                setCheckbox('tipo_servicio', 'otros', true);
+            }
+        } else {
+            // Compatibilidad si solo se llenó texto de requerimiento o incidencia
+            if (ticket.requerimiento) {
+                setCheckbox('tipo_servicio', 'requerimiento', true);
+            }
+            if (ticket.incidencia) {
+                setCheckbox('tipo_servicio', 'incidencia', true);
+            }
         }
 
-        // 11. Incidencia (marca la casilla)
-        if (ticket.incidencia) {
-            setCheckbox('tipo_servicio', 'incidencia', true);
+        // Fecha de servicio programada
+        if (ticket.fecha_servicio) {
+            setInputValue('fecha', ticket.fecha_servicio);
+        }
+
+        // Hora de servicio programada
+        if (ticket.hora_servicio) {
+            setInputValue('h_ll_c', ticket.hora_servicio);
+            setInputValue('h_i_s', ticket.hora_servicio);
         }
 
         // Nombre de técnico responsable

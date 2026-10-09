@@ -240,6 +240,7 @@ app.get('/api/tickets', authMiddleware, async (req, res) => {
                    t.direccion, t.telefono, t.distrito, t.marca, t.modelo, t.serie,
                    t.requerimiento, t.incidencia, t.estado_ticket, t.tipo_formato,
                    t.falla_real, t.actividad_realizada, t.numero_cast, t.fecha_atencion,
+                   t.fecha_servicio::text as fecha_servicio, t.hora_servicio, t.tipo_servicio, t.salida_directa,
                    t.creado_en, t.actualizado_en,
                    u.nombre as nombre_tecnico, u.correo as correo_tecnico
             FROM ticket t
@@ -300,7 +301,7 @@ app.get('/api/tickets/:id', authMiddleware, async (req, res) => {
 // Asignar ticket directamente por NÚMERO DE TICKET y TÉCNICO (Administrador y Dispatcher)
 app.post('/api/tickets/asignar-por-numero', authMiddleware, requireRoles(1, 2), async (req, res) => {
     try {
-        const { numero_ticket, id_usuario_asignado, tipo_formato } = req.body;
+        const { numero_ticket, id_usuario_asignado, tipo_formato, fecha_servicio, hora_servicio, tipo_servicio } = req.body;
         if (!numero_ticket || !id_usuario_asignado) {
             return res.status(400).json({ success: false, message: 'Ingrese el número de ticket y seleccione un técnico.' });
         }
@@ -332,19 +333,23 @@ app.post('/api/tickets/asignar-por-numero', authMiddleware, requireRoles(1, 2), 
         const ticket = rows[0];
         const formatoFinal = tipo_formato || ticket.tipo_formato || 'Multimarca';
 
-        // Asignar ticket en MySQL y cambiar automáticamente su estado a 'En Proceso'
+        // Asignar ticket y actualizar programación
         await pool.query(
             `UPDATE ticket 
              SET id_usuario_asignado = ?, 
                  tipo_formato = ?,
-                 estado_ticket = 'En Proceso'
+                 fecha_servicio = COALESCE(?::date, fecha_servicio, CURRENT_DATE),
+                 hora_servicio = COALESCE(?, hora_servicio, '09:00'),
+                 tipo_servicio = COALESCE(?, tipo_servicio, 'incidencia'),
+                 estado_ticket = 'En Proceso',
+                 actualizado_en = CURRENT_TIMESTAMP
              WHERE id_ticket = ?`,
-            [id_usuario_asignado, formatoFinal, ticket.id_ticket]
+            [id_usuario_asignado, formatoFinal, fecha_servicio || null, hora_servicio || null, tipo_servicio || null, ticket.id_ticket]
         );
 
         // Devolver ticket con todas sus columnas leídas de la BD
         const [updatedRows] = await pool.query(
-            `SELECT t.*, u.nombre as nombre_tecnico, u.correo as correo_tecnico
+            `SELECT t.*, t.fecha_servicio::text as fecha_servicio, u.nombre as nombre_tecnico, u.correo as correo_tecnico
              FROM ticket t
              JOIN usuarios u ON t.id_usuario_asignado = u.id_usuario
              WHERE t.id_ticket = ?`,
@@ -380,7 +385,11 @@ app.post('/api/tickets', authMiddleware, requireRoles(1, 2), async (req, res) =>
             serie,
             requerimiento,
             incidencia,
-            tipo_formato
+            tipo_formato,
+            fecha_servicio,
+            hora_servicio,
+            tipo_servicio,
+            salida_directa
         } = req.body;
 
         if (!numero_ticket || !cliente || !usuario) {
@@ -403,8 +412,9 @@ app.post('/api/tickets', authMiddleware, requireRoles(1, 2), async (req, res) =>
             `INSERT INTO ticket (
                 numero_ticket, id_usuario_asignado, cliente, usuario, direccion,
                 telefono, distrito, marca, modelo, serie, requerimiento,
-                incidencia, estado_ticket, tipo_formato
-             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pendiente', ?)`,
+                incidencia, estado_ticket, tipo_formato, fecha_servicio,
+                hora_servicio, tipo_servicio, salida_directa
+             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pendiente', ?, COALESCE(?::date, CURRENT_DATE), COALESCE(?, '09:00'), COALESCE(?, 'incidencia'), COALESCE(?, true))`,
             [
                 numero_ticket.trim(),
                 id_usuario_asignado ? parseInt(id_usuario_asignado) : null,
@@ -418,7 +428,11 @@ app.post('/api/tickets', authMiddleware, requireRoles(1, 2), async (req, res) =>
                 serie || null,
                 requerimiento || null,
                 incidencia || null,
-                formato
+                formato,
+                fecha_servicio || null,
+                hora_servicio || null,
+                tipo_servicio || null,
+                salida_directa !== undefined ? salida_directa : true
             ]
         );
 
@@ -430,6 +444,77 @@ app.post('/api/tickets', authMiddleware, requireRoles(1, 2), async (req, res) =>
     } catch (err) {
         console.error('Error al crear ticket:', err);
         res.status(500).json({ success: false, message: 'Error al registrar ticket en la base de datos.' });
+    }
+});
+
+// Actualizar ticket (Administrador y Dispatcher)
+app.put('/api/tickets/:id', authMiddleware, requireRoles(1, 2), async (req, res) => {
+    try {
+        const ticketId = req.params.id;
+        const {
+            cliente,
+            usuario,
+            direccion,
+            telefono,
+            distrito,
+            marca,
+            modelo,
+            serie,
+            tipo_formato,
+            id_usuario_asignado,
+            fecha_servicio,
+            hora_servicio,
+            tipo_servicio,
+            salida_directa,
+            estado_ticket
+        } = req.body;
+
+        await pool.query(
+            `UPDATE ticket 
+             SET cliente = COALESCE(?, cliente),
+                 usuario = COALESCE(?, usuario),
+                 direccion = COALESCE(?, direccion),
+                 telefono = COALESCE(?, telefono),
+                 distrito = COALESCE(?, distrito),
+                 marca = COALESCE(?, marca),
+                 modelo = COALESCE(?, modelo),
+                 serie = COALESCE(?, serie),
+                 tipo_formato = COALESCE(?, tipo_formato),
+                 id_usuario_asignado = CASE WHEN ? IS NOT NULL THEN ? ELSE id_usuario_asignado END,
+                 fecha_servicio = CASE WHEN ? IS NOT NULL THEN ?::date ELSE fecha_servicio END,
+                 hora_servicio = COALESCE(?, hora_servicio),
+                 tipo_servicio = COALESCE(?, tipo_servicio),
+                 salida_directa = CASE WHEN ? IS NOT NULL THEN ? ELSE salida_directa END,
+                 estado_ticket = COALESCE(?, estado_ticket),
+                 actualizado_en = CURRENT_TIMESTAMP
+             WHERE id_ticket = ?`,
+            [
+                cliente || null,
+                usuario || null,
+                direccion || null,
+                telefono || null,
+                distrito || null,
+                marca || null,
+                modelo || null,
+                serie || null,
+                tipo_formato || null,
+                id_usuario_asignado !== undefined ? (id_usuario_asignado ? parseInt(id_usuario_asignado) : null) : null,
+                id_usuario_asignado !== undefined ? (id_usuario_asignado ? parseInt(id_usuario_asignado) : null) : null,
+                fecha_servicio || null,
+                fecha_servicio || null,
+                hora_servicio || null,
+                tipo_servicio || null,
+                salida_directa !== undefined ? salida_directa : null,
+                salida_directa !== undefined ? salida_directa : null,
+                estado_ticket || null,
+                ticketId
+            ]
+        );
+
+        res.json({ success: true, message: 'Ticket actualizado correctamente.' });
+    } catch (err) {
+        console.error('Error al actualizar ticket:', err);
+        res.status(500).json({ success: false, message: 'Error interno al actualizar ticket.' });
     }
 });
 
@@ -560,12 +645,104 @@ app.put('/api/tickets/:id/completar', async (req, res) => {
 
         res.json({
             success: true,
-            message: `Ticket '${ticket.numero_ticket}' guardado exitosamente (Estado: ${nuevoEstado}).`,
-            estado_ticket: nuevoEstado
+            message: `Ticket '${ticket.numero_ticket}' actualizado a estado '${nuevoEstado}'.`
         });
     } catch (err) {
         console.error('Error al completar ticket:', err);
-        res.status(500).json({ success: false, message: 'Error al actualizar el ticket.' });
+        res.status(500).json({ success: false, message: 'Error interno al actualizar estado del ticket.' });
+    }
+});
+
+// ==========================================
+// REPORTE DIARIO DE SALIDAS A SERVICIO (DASHBOARD)
+// ==========================================
+app.get('/api/dashboard/salidas', authMiddleware, async (req, res) => {
+    try {
+        let queryDate = req.query.fecha; // YYYY-MM-DD
+        if (!queryDate || queryDate.trim() === '') {
+            const [dateRow] = await pool.query('SELECT CURRENT_DATE::text as hoy');
+            queryDate = dateRow[0].hoy;
+        } else {
+            queryDate = queryDate.trim();
+        }
+
+        const [tickets] = await pool.query(
+            `SELECT t.id_ticket, t.numero_ticket, t.id_usuario_asignado, t.cliente, t.usuario,
+                    t.direccion, t.distrito, t.marca, t.modelo, t.serie, t.estado_ticket,
+                    t.tipo_formato, t.fecha_servicio::text as fecha_servicio, t.hora_servicio, t.tipo_servicio, t.salida_directa,
+                    u.nombre as nombre_tecnico, u.telefono as telefono_tecnico
+             FROM ticket t
+             LEFT JOIN usuarios u ON t.id_usuario_asignado = u.id_usuario
+             WHERE t.fecha_servicio = ?::date
+             ORDER BY t.hora_servicio ASC, t.id_ticket ASC`,
+            [queryDate]
+        );
+
+        // Calcular métricas
+        const tecnicosSet = new Set();
+        const clientesSet = new Set();
+        const distritosSet = new Set();
+        let incidentesCount = 0;
+        let mantenimientosCount = 0;
+        let requerimientosCount = 0;
+        let otrosCount = 0;
+
+        tickets.forEach(t => {
+            if (t.nombre_tecnico && t.nombre_tecnico.trim()) {
+                tecnicosSet.add(t.nombre_tecnico.trim().toUpperCase());
+            }
+            if (t.cliente && t.cliente.trim()) {
+                clientesSet.add(t.cliente.trim().toUpperCase());
+            }
+            if (t.distrito && t.distrito.trim()) {
+                distritosSet.add(t.distrito.trim().toUpperCase());
+            }
+
+            const tipo = (t.tipo_servicio || '').toLowerCase();
+            if (tipo.includes('inciden') || tipo.includes('incidente') || tipo.includes('fall')) {
+                incidentesCount++;
+            } else if (tipo.includes('mantenim')) {
+                mantenimientosCount++;
+            } else if (tipo.includes('requerim')) {
+                requerimientosCount++;
+            } else {
+                otrosCount++;
+            }
+        });
+
+        // Nombres de días de la semana en español
+        const diasEspanol = ['DOMINGO', 'LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO'];
+        const diasCapital = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        const [year, month, day] = queryDate.split('-').map(Number);
+        const dateObj = new Date(year, month - 1, day);
+        const dayIdx = dateObj.getDay();
+        const diaSemanaUpper = diasEspanol[dayIdx];
+        const diaSemanaCapital = diasCapital[dayIdx];
+        const fechaFormateada = `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
+
+        res.json({
+            success: true,
+            fecha: queryDate,
+            fecha_formateada: fechaFormateada,
+            dia_semana: diaSemanaUpper,
+            dia_capital: diaSemanaCapital,
+            resumen: {
+                total_servicios: tickets.length,
+                tecnicos_count: tecnicosSet.size,
+                clientes_count: clientesSet.size,
+                distritos_count: distritosSet.size,
+                tipos: {
+                    incidentes: incidentesCount,
+                    mantenimientos: mantenimientosCount,
+                    requerimientos: requerimientosCount,
+                    otros: otrosCount
+                }
+            },
+            salidas: tickets
+        });
+    } catch (err) {
+        console.error('Error al obtener reporte de salidas:', err);
+        res.status(500).json({ success: false, message: 'Error al consultar reporte de salidas.' });
     }
 });
 

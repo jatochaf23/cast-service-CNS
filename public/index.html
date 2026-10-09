@@ -8,6 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
+        @media print {
+            body { background: #ffffff !important; padding: 0 !important; margin: 0 !important; }
+            header, #toast-container, .no-print, #section-tickets-tab, #tecnico-view { display: none !important; }
+            #admin-dispatcher-view, #section-dashboard-tab { display: block !important; margin: 0 !important; padding: 0 !important; }
+            #printable-dashboard { border: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; width: 100% !important; }
+        }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col selection:bg-blue-600 selection:text-white">
@@ -58,157 +64,389 @@
         <!-- ============================================================== -->
         <div id="admin-dispatcher-view" class="hidden space-y-6">
             
-            <!-- Header section & actions -->
-            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-2xl font-black text-slate-900 tracking-tight">Gestión y Asignación de Tickets</h2>
-                    <p class="text-sm text-slate-500">Asigne constancias técnicas con número de ticket específico a cada técnico.</p>
+            <!-- Barra Superior de Pestañas: Bandeja de Tickets vs Reporte Salidas a Servicio -->
+            <div class="no-print flex flex-wrap items-center justify-between gap-3 bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="flex items-center gap-2">
+                    <button id="tab-btn-tickets" onclick="switchMainTab('tickets')" 
+                        class="px-4 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-2 bg-[#1e3a8a] text-white shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                        <span>Bandeja de Tickets</span>
+                    </button>
+                    <button id="tab-btn-dashboard" onclick="switchMainTab('dashboard')" 
+                        class="px-4 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-2 bg-slate-100 text-slate-700 hover:text-blue-900 hover:bg-blue-50 border border-slate-200">
+                        <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                        <span>Salidas a Servicio (Dashboard)</span>
+                    </button>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button id="btn-new-ticket" onclick="openNewTicketModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-[#1e3a8a] hover:bg-[#172554] text-white font-semibold text-sm rounded-xl border border-[#2d52a8] shadow-sm transition-all">
+                    <button id="btn-new-ticket" onclick="openNewTicketModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#1e3a8a] hover:bg-[#172554] text-white font-semibold text-xs sm:text-sm rounded-xl border border-[#2d52a8] shadow-sm transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         <span>Nuevo Ticket</span>
                     </button>
-                    <button id="btn-manage-users" onclick="openUsersModal()" class="hidden inline-flex items-center gap-1.5 px-3 py-2.5 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm rounded-xl border border-slate-300 transition-all">
+                    <button id="btn-manage-users" onclick="openUsersModal()" class="hidden inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs sm:text-sm rounded-xl border border-slate-300 transition-all">
                         <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                        <span>Usuarios / Personal</span>
+                        <span>Personal</span>
                     </button>
                 </div>
             </div>
 
-            <!-- KPI Counters -->
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+            <!-- ========================================== -->
+            <!-- PESTAÑA 1: BANDEJA DE TICKETS -->
+            <!-- ========================================== -->
+            <div id="section-tickets-tab" class="space-y-6">
+                <!-- Header section & actions -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Tickets</p>
-                        <h3 id="stat-total" class="text-2xl font-extrabold text-slate-900 mt-1">0</h3>
-                    </div>
-                    <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 border border-slate-200/60">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                        <h2 class="text-2xl font-black text-slate-900 tracking-tight">Gestión y Asignación de Tickets</h2>
+                        <p class="text-sm text-slate-500">Asigne constancias técnicas con número de ticket específico a cada técnico.</p>
                     </div>
                 </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Pendientes</p>
-                        <h3 id="stat-pendientes" class="text-2xl font-extrabold text-slate-800 mt-1">0</h3>
+
+                <!-- KPI Counters -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-400">Total Tickets</p>
+                            <h3 id="stat-total" class="text-2xl font-extrabold text-slate-900 mt-1">0</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600 border border-slate-200/60">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                        </div>
                     </div>
-                    <div class="w-10 h-10 rounded-xl bg-amber-50/70 border border-amber-200/60 flex items-center justify-center text-amber-700">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Pendientes</p>
+                            <h3 id="stat-pendientes" class="text-2xl font-extrabold text-slate-800 mt-1">0</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-amber-50/70 border border-amber-200/60 flex items-center justify-center text-amber-700">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">En Proceso</p>
+                            <h3 id="stat-proceso" class="text-2xl font-extrabold text-slate-800 mt-1">0</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Atendidos</p>
+                            <h3 id="stat-atendidos" class="text-2xl font-extrabold text-emerald-900 mt-1">0</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-xl bg-emerald-50/70 border border-emerald-200/60 flex items-center justify-center text-emerald-800">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        </div>
                     </div>
                 </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">En Proceso</p>
-                        <h3 id="stat-proceso" class="text-2xl font-extrabold text-slate-800 mt-1">0</h3>
+
+                <!-- ASIGNACIÓN DIRECTA DE TICKET (CON TIPO DE SERVICIO Y HORA) -->
+                <div class="bg-[#0b1a30] p-5 rounded-2xl border border-[#1b355c] shadow-sm text-white">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="p-1.5 bg-[#132a4d] rounded-lg text-blue-200 border border-[#1e3e6b]">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                        </span>
+                        <div>
+                            <h3 class="text-sm font-bold tracking-tight text-white">Asignación Directa de CAST por N° de Ticket</h3>
+                            <p class="text-xs text-blue-200/70">Asigne el ticket seleccionando su tipo de atención y hora programada:</p>
+                        </div>
                     </div>
-                    <div class="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-700">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+
+                    <form onsubmit="handleQuickAssign(event)" class="mt-3 grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                        <div class="sm:col-span-3">
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-blue-200/70 mb-1">N° Ticket</label>
+                            <input type="text" id="quick-ticket-input" required list="tickets-datalist" placeholder="Ingrese o seleccione..."
+                                class="w-full px-3 py-2 bg-[#060f1c] border border-[#1b355c] rounded-xl text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] font-mono">
+                            <datalist id="tickets-datalist"></datalist>
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-blue-200/70 mb-1">Tipo de Servicio</label>
+                            <select id="quick-tipo-select"
+                                class="w-full px-3 py-2 bg-[#060f1c] border border-[#1b355c] rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+                                <option value="incidencia">⚠️ Incidente</option>
+                                <option value="requerimiento">📄 Requerimiento</option>
+                                <option value="mantenimiento">🔧 Mantenimiento</option>
+                                <option value="contrato">Contrato</option>
+                                <option value="garantia">Garantía</option>
+                                <option value="otros">Otros</option>
+                            </select>
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-blue-200/70 mb-1">Hora Salida</label>
+                            <input type="time" id="quick-hora-input" value="09:00"
+                                class="w-full px-3 py-2 bg-[#060f1c] border border-[#1b355c] rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] font-mono">
+                        </div>
+
+                        <div class="sm:col-span-2">
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-blue-200/70 mb-1">Formato</label>
+                            <select id="quick-formato-select" required
+                                class="w-full px-3 py-2 bg-[#060f1c] border border-[#1b355c] rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] font-medium">
+                                <option value="Multimarca">Multimarca</option>
+                                <option value="Lexmark">Lexmark</option>
+                            </select>
+                        </div>
+
+                        <div class="sm:col-span-3">
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-blue-200/70 mb-1">Técnico Responsable</label>
+                            <div class="flex gap-1.5">
+                                <select id="quick-tecnico-select" required
+                                    class="w-full px-3 py-2 bg-[#060f1c] border border-[#1b355c] rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+                                    <option value="">-- Seleccionar --</option>
+                                </select>
+                                <button type="submit" id="btn-quick-assign" title="Asignar y Programar CAST"
+                                    class="py-2 px-3 bg-[#1e3a8a] hover:bg-[#172554] active:bg-[#0b1a30] text-white font-bold text-xs rounded-xl border border-[#2d52a8] shadow-sm transition-all flex items-center justify-center shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    <span class="hidden lg:inline ml-1">Asignar</span>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Filters Bar -->
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+                        <button onclick="setFilter('Todos')" id="filter-Todos" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#1e3a8a] text-white whitespace-nowrap">Todos</button>
+                        <button onclick="setFilter('Pendiente')" id="filter-Pendiente" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 hover:bg-blue-50/60 hover:text-blue-900 border border-slate-200 whitespace-nowrap">Pendientes</button>
+                        <button onclick="setFilter('En Proceso')" id="filter-En Proceso" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 hover:bg-blue-50/60 hover:text-blue-900 border border-slate-200 whitespace-nowrap">En Proceso</button>
+                        <button onclick="setFilter('Atendido')" id="filter-Atendido" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 hover:bg-blue-50/60 hover:text-blue-900 border border-slate-200 whitespace-nowrap">Atendidos</button>
+                    </div>
+                    <div class="relative w-full sm:w-72">
+                        <input type="text" id="search-input" onkeyup="renderTicketsTable()" placeholder="Buscar por ticket, cliente o serie..."
+                            class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white">
+                        <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </span>
                     </div>
                 </div>
-                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-bold uppercase tracking-wider text-slate-500">Atendidos</p>
-                        <h3 id="stat-atendidos" class="text-2xl font-extrabold text-emerald-900 mt-1">0</h3>
+
+                <!-- Tickets Desktop Table View (>= md) -->
+                <div class="hidden md:block bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-slate-100/75 border-b border-slate-200 text-slate-600 font-bold uppercase text-[11px] tracking-wider">
+                                    <th class="py-3.5 px-4">Ticket</th>
+                                    <th class="py-3.5 px-4">Cliente / Usuario</th>
+                                    <th class="py-3.5 px-4">Programación</th>
+                                    <th class="py-3.5 px-4">Equipo</th>
+                                    <th class="py-3.5 px-4">Formato</th>
+                                    <th class="py-3.5 px-4">Técnico Asignado</th>
+                                    <th class="py-3.5 px-4">Estado</th>
+                                    <th class="py-3.5 px-4 text-center">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tickets-table-body" class="divide-y divide-slate-100">
+                                <tr>
+                                    <td colspan="8" class="text-center py-8 text-slate-400">Cargando tickets de la base de datos...</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
-                    <div class="w-10 h-10 rounded-xl bg-emerald-50/70 border border-emerald-200/60 flex items-center justify-center text-emerald-800">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+
+                <!-- Tickets Mobile Cards View (< md) -->
+                <div id="tickets-cards-mobile" class="block md:hidden space-y-3">
+                    <div class="text-center py-8 text-slate-400 bg-white rounded-2xl border border-slate-200 p-4">
+                        Cargando tickets de la base de datos...
                     </div>
                 </div>
             </div>
 
-            <!-- ASIGNACIÓN DIRECTA DE TICKET (SOLO COLOCAR NÚMERO DE TICKET Y TÉCNICO) -->
-            <div class="bg-[#0b1a30] p-5 rounded-2xl border border-[#1b355c] shadow-sm text-white">
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="p-1.5 bg-[#132a4d] rounded-lg text-blue-200 border border-[#1e3e6b]">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-                    </span>
-                    <div>
-                        <h3 class="text-sm font-bold tracking-tight text-white">Asignación Directa de CAST por N° de Ticket</h3>
-                        <p class="text-xs text-blue-200/70">Ingrese el número de ticket registrado en la base de datos para asignarlo al técnico responsable:</p>
-                    </div>
-                </div>
-
-                <form onsubmit="handleQuickAssign(event)" class="mt-3 grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-                    <div class="sm:col-span-4">
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-blue-200/70 mb-1">N° de Ticket (ej: TCK-2026-019)</label>
-                        <input type="text" id="quick-ticket-input" required list="tickets-datalist" placeholder="Ingrese o seleccione ticket..."
-                            class="w-full px-3 py-2.5 bg-[#060f1c] border border-[#1b355c] rounded-xl text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] font-mono">
-                        <datalist id="tickets-datalist"></datalist>
-                    </div>
-
-                    <div class="sm:col-span-3">
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-blue-200/70 mb-1">Formato CAST</label>
-                        <select id="quick-formato-select" required
-                            class="w-full px-3 py-2.5 bg-[#060f1c] border border-[#1b355c] rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] font-medium">
-                            <option value="Multimarca">Multimarca (General)</option>
-                            <option value="Lexmark">Lexmark (Especializado)</option>
-                        </select>
-                    </div>
-
-                    <div class="sm:col-span-3">
-                        <label class="block text-[11px] font-bold uppercase tracking-wider text-blue-200/70 mb-1">Técnico Responsable</label>
-                        <select id="quick-tecnico-select" required
-                            class="w-full px-3 py-2.5 bg-[#060f1c] border border-[#1b355c] rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
-                            <option value="">-- Seleccionar Técnico --</option>
-                        </select>
-                    </div>
-
-                    <div class="sm:col-span-2">
-                        <button type="submit" id="btn-quick-assign"
-                            class="w-full py-2.5 px-3 bg-[#1e3a8a] hover:bg-[#172554] active:bg-[#0b1a30] text-white font-semibold text-xs rounded-xl border border-[#2d52a8] shadow-sm transition-all flex items-center justify-center gap-1.5 min-h-[40px]">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                            <span>Asignar CAST</span>
+            <!-- ========================================== -->
+            <!-- PESTAÑA 2: REPORTE DIARIO DE SALIDAS A SERVICIO (DASHBOARD) -->
+            <!-- ========================================== -->
+            <div id="section-dashboard-tab" class="hidden space-y-6">
+                <!-- Controles de Fecha y Acciones del Reporte -->
+                <div class="no-print bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div class="flex items-center gap-2 w-full sm:w-auto">
+                        <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Fecha del Reporte:</span>
+                        <input type="date" id="dash-date-picker" onchange="loadDashboardSalidas(this.value)" 
+                            class="px-3 py-1.5 border border-slate-300 rounded-xl text-xs font-semibold text-slate-800 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                        <button onclick="setDashboardToday()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors">
+                            Hoy
                         </button>
                     </div>
-                </form>
-            </div>
-
-            <!-- Filters Bar -->
-            <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div class="flex items-center gap-1.5 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
-                    <button onclick="setFilter('Todos')" id="filter-Todos" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-[#1e3a8a] text-white whitespace-nowrap">Todos</button>
-                    <button onclick="setFilter('Pendiente')" id="filter-Pendiente" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 hover:bg-blue-50/60 hover:text-blue-900 border border-slate-200 whitespace-nowrap">Pendientes</button>
-                    <button onclick="setFilter('En Proceso')" id="filter-En Proceso" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 hover:bg-blue-50/60 hover:text-blue-900 border border-slate-200 whitespace-nowrap">En Proceso</button>
-                    <button onclick="setFilter('Atendido')" id="filter-Atendido" class="filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-white text-slate-600 hover:bg-blue-50/60 hover:text-blue-900 border border-slate-200 whitespace-nowrap">Atendidos</button>
+                    <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                        <button onclick="window.print()" class="px-4 py-2 bg-[#0f2942] hover:bg-[#1a3c61] text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                            <span>Imprimir / Descargar Reporte</span>
+                        </button>
+                        <button onclick="loadDashboardSalidas()" class="p-2 bg-white hover:bg-slate-50 text-slate-600 border border-slate-200 rounded-xl text-xs font-semibold transition-colors" title="Actualizar">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                        </button>
+                    </div>
                 </div>
-                <div class="relative w-full sm:w-72">
-                    <input type="text" id="search-input" onkeyup="renderTicketsTable()" placeholder="Buscar por ticket, cliente o serie..."
-                        class="w-full pl-9 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white">
-                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    </span>
-                </div>
-            </div>
 
-            <!-- Tickets Desktop Table View (>= md) -->
-            <div class="hidden md:block bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-xs">
-                        <thead>
-                            <tr class="bg-slate-100/75 border-b border-slate-200 text-slate-600 font-bold uppercase text-[11px] tracking-wider">
-                                <th class="py-3.5 px-4">Ticket</th>
-                                <th class="py-3.5 px-4">Cliente / Usuario</th>
-                                <th class="py-3.5 px-4">Ubicación</th>
-                                <th class="py-3.5 px-4">Equipo</th>
-                                <th class="py-3.5 px-4">Formato</th>
-                                <th class="py-3.5 px-4">Técnico Asignado</th>
-                                <th class="py-3.5 px-4">Estado</th>
-                                <th class="py-3.5 px-4 text-center">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tickets-table-body" class="divide-y divide-slate-100">
-                            <tr>
-                                <td colspan="8" class="text-center py-8 text-slate-400">Cargando tickets de la base de datos...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                <!-- CONTENEDOR DEL DASHBOARD (DISEÑO IDÉNTICO A LA IMAGEN) -->
+                <div id="printable-dashboard" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+                    
+                    <!-- CABECERA DEL REPORTE -->
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pb-5 border-b-2 border-slate-100">
+                        <!-- Logo CNS -->
+                        <div class="flex items-center gap-3">
+                            <img src="cns_logo.svg" alt="CNS Logo" class="h-16 w-auto max-w-[210px] object-contain">
+                        </div>
 
-            <!-- Tickets Mobile Cards View (< md) -->
-            <div id="tickets-cards-mobile" class="block md:hidden space-y-3">
-                <div class="text-center py-8 text-slate-400 bg-white rounded-2xl border border-slate-200 p-4">
-                    Cargando tickets de la base de datos...
+                        <!-- Título Central -->
+                        <div class="text-center sm:text-left flex-1 sm:pl-8 sm:border-l sm:border-slate-300">
+                            <h2 class="text-2xl sm:text-3xl font-black text-[#0f2942] tracking-tight uppercase leading-none">
+                                SALIDAS A SERVICIO
+                            </h2>
+                            <div class="text-lg sm:text-xl font-black text-[#0284c7] tracking-tight uppercase mt-1">
+                                <span id="dash-dia-display">VIERNES</span> - DIRECTO A SERVICIO
+                            </div>
+                        </div>
+
+                        <!-- Caja de Fecha -->
+                        <div class="bg-sky-50/70 border border-sky-200 rounded-2xl p-3 flex items-center gap-3 min-w-[210px]">
+                            <div class="text-sky-600">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Fecha de Servicio</div>
+                                <div id="dash-fecha-display" class="text-lg font-black text-[#0f2942] leading-tight">--/--/----</div>
+                                <div id="dash-dia-capital" class="text-xs font-semibold text-slate-600">(...)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TARJETAS DE RESUMEN (KPIs) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        
+                        <!-- Card 1: Técnicos -->
+                        <div class="bg-[#f0f9ff]/70 border border-sky-100 rounded-2xl p-5 flex items-center gap-4">
+                            <div class="text-[#0f2942]">
+                                <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <div id="dash-count-tecnicos" class="text-4xl font-black text-[#0f2942] leading-none">0</div>
+                                <div class="text-sm font-black text-[#0f2942] uppercase tracking-tight mt-1">TÉCNICOS</div>
+                                <div class="text-[11px] font-bold text-sky-600 uppercase">EN SALIDA DIRECTA</div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Clientes -->
+                        <div class="bg-[#f0f9ff]/70 border border-sky-100 rounded-2xl p-5 flex items-center gap-4">
+                            <div class="text-[#0f2942]">
+                                <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <div id="dash-count-clientes" class="text-4xl font-black text-[#0f2942] leading-none">0</div>
+                                <div class="text-sm font-black text-[#0f2942] uppercase tracking-tight mt-1">CLIENTES</div>
+                                <div class="text-[11px] font-bold text-sky-600 uppercase">A ATENDER</div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Distritos -->
+                        <div class="bg-[#f0f9ff]/70 border border-sky-100 rounded-2xl p-5 flex items-center gap-4">
+                            <div class="text-[#0f2942]">
+                                <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <div id="dash-count-distritos" class="text-4xl font-black text-[#0f2942] leading-none">0</div>
+                                <div class="text-sm font-black text-[#0f2942] uppercase tracking-tight mt-1">DISTRITOS</div>
+                                <div class="text-[11px] font-bold text-sky-600 uppercase">DE DESTINO</div>
+                            </div>
+                        </div>
+
+                        <!-- Card 4: Breakdown de Tipos -->
+                        <div class="bg-white border border-slate-200 rounded-2xl p-3 flex flex-col justify-center space-y-2 shadow-xs">
+                            <!-- Incidente -->
+                            <div class="flex items-center justify-between px-3 py-1 bg-red-50/70 rounded-xl border border-red-100">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-red-600 font-bold">⚠️</span>
+                                    <span id="dash-count-incidentes" class="text-base font-black text-slate-900">0</span>
+                                </div>
+                                <span class="text-[11px] font-extrabold text-red-600 uppercase tracking-wide">INCIDENTE</span>
+                            </div>
+                            <!-- Mantenimiento -->
+                            <div class="flex items-center justify-between px-3 py-1 bg-emerald-50/70 rounded-xl border border-emerald-100">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-emerald-600 font-bold">🔧</span>
+                                    <span id="dash-count-mantenimientos" class="text-base font-black text-slate-900">0</span>
+                                </div>
+                                <span class="text-[11px] font-extrabold text-emerald-600 uppercase tracking-wide">MANTENIMIENTOS</span>
+                            </div>
+                            <!-- Requerimiento -->
+                            <div class="flex items-center justify-between px-3 py-1 bg-sky-50/70 rounded-xl border border-sky-100">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sky-600 font-bold">📄</span>
+                                    <span id="dash-count-requerimientos" class="text-base font-black text-slate-900">0</span>
+                                </div>
+                                <span class="text-[11px] font-extrabold text-sky-600 uppercase tracking-wide">REQUERIMIENTOS</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TABLA PRINCIPAL DE SALIDAS -->
+                    <div class="rounded-2xl border border-[#0f406e] overflow-hidden shadow-sm">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="bg-[#0b4d82] text-white font-black text-xs uppercase tracking-wider">
+                                        <th class="py-3.5 px-4 text-center whitespace-nowrap w-24">
+                                            <span class="flex items-center justify-center gap-1.5">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                                HORA
+                                            </span>
+                                        </th>
+                                        <th class="py-3.5 px-4">
+                                            <span class="flex items-center gap-1.5">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                                TÉCNICO
+                                            </span>
+                                        </th>
+                                        <th class="py-3.5 px-4">
+                                            <span class="flex items-center gap-1.5">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+                                                CLIENTE
+                                            </span>
+                                        </th>
+                                        <th class="py-3.5 px-4">
+                                            <span class="flex items-center gap-1.5">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path></svg>
+                                                DISTRITO
+                                            </span>
+                                        </th>
+                                        <th class="py-3.5 px-4 text-center whitespace-nowrap w-44">
+                                            <span class="flex items-center justify-center gap-1.5">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                                                TIPO
+                                            </span>
+                                        </th>
+                                        <th class="py-3.5 px-3 text-center no-print w-28">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dash-table-body" class="divide-y divide-slate-200">
+                                    <tr>
+                                        <td colspan="6" class="text-center py-8 text-slate-400">Cargando reporte de salidas...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- PIE DE PÁGINA DEL REPORTE -->
+                    <div class="flex items-center justify-between pt-4 border-t border-slate-200 text-xs text-slate-500 font-semibold">
+                        <div>Centro Nacional de Servicios</div>
+                        <div class="flex items-center gap-1 font-mono text-slate-600">
+                            <span>📅</span>
+                            <span id="dash-footer-fecha">--/--/----</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -349,6 +587,27 @@
                             </select>
                         </div>
                     </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3 pt-3 border-t border-slate-100">
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Tipo de Servicio <span class="text-red-500">*</span></label>
+                            <select id="nt-tipo-servicio" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-slate-800">
+                                <option value="incidencia">⚠️ Incidencia</option>
+                                <option value="requerimiento">📄 Requerimiento</option>
+                                <option value="mantenimiento">🔧 Mantenimiento</option>
+                                <option value="contrato">Contrato</option>
+                                <option value="garantia">Garantía</option>
+                                <option value="otros">Otros</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Fecha Programada</label>
+                            <input type="date" id="nt-fecha-servicio" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1">Hora Programada</label>
+                            <input type="time" id="nt-hora-servicio" value="09:00" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Cliente -->
@@ -418,6 +677,103 @@
                     </button>
                     <button type="submit" id="nt-btn-submit" class="px-4 py-2 bg-[#1e3a8a] hover:bg-[#172554] text-white text-xs font-bold rounded-xl transition-colors shadow-sm">
                         Guardar Ticket
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: EDITAR TICKET / PROGRAMACIÓN (ADMINISTRADOR Y DISPATCHER) -->
+    <div id="edit-ticket-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 flex flex-col">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+                <div class="flex items-center gap-2">
+                    <span class="p-2 bg-blue-50 rounded-xl text-[#1e3a8a]">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    </span>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 leading-tight">Editar / Programar Servicio</h3>
+                        <p class="text-xs text-slate-500">Actualizar horario, tipo de atención o técnico asignado</p>
+                    </div>
+                </div>
+                <button onclick="closeEditTicketModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <form id="edit-ticket-form" onsubmit="submitEditTicket(event)" class="space-y-3.5 text-xs">
+                <input type="hidden" id="et-id-ticket">
+
+                <div class="grid grid-cols-2 gap-3 bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                    <div>
+                        <span class="text-[10px] font-bold uppercase text-slate-400">N° de Ticket</span>
+                        <div id="et-numero-display" class="font-mono font-black text-sm text-[#1e3a8a]">--</div>
+                    </div>
+                    <div>
+                        <span class="text-[10px] font-bold uppercase text-slate-400">Cliente</span>
+                        <div id="et-cliente-display" class="font-bold text-xs text-slate-800 truncate">--</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">Tipo de Servicio</label>
+                        <select id="et-tipo-servicio" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white font-semibold text-slate-800">
+                            <option value="incidencia">⚠️ Incidencia</option>
+                            <option value="requerimiento">📄 Requerimiento</option>
+                            <option value="mantenimiento">🔧 Mantenimiento</option>
+                            <option value="contrato">Contrato</option>
+                            <option value="garantia">Garantía</option>
+                            <option value="otros">Otros</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">Formato CAST</label>
+                        <select id="et-formato" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                            <option value="Multimarca">Multimarca</option>
+                            <option value="Lexmark">Lexmark</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">Fecha Programada</label>
+                        <input type="date" id="et-fecha-servicio" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white font-mono">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">Hora Programada</label>
+                        <input type="time" id="et-hora-servicio" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white font-mono">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1">Técnico Asignado</label>
+                    <select id="et-tecnico" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                        <option value="">-- Sin Asignar --</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1">Distrito de Destino</label>
+                    <input type="text" id="et-distrito" placeholder="Ej: San Isidro, Callao..." class="w-full px-3 py-2 border border-slate-300 rounded-lg">
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-600 mb-1">Estado</label>
+                    <select id="et-estado" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                        <option value="Pendiente">Pendiente</option>
+                        <option value="En Proceso">En Proceso</option>
+                        <option value="Atendido">Atendido</option>
+                    </select>
+                </div>
+
+                <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="closeEditTicketModal()" class="px-3.5 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" id="et-btn-submit" class="px-4 py-2 bg-[#1e3a8a] hover:bg-[#172554] text-white text-xs font-bold rounded-xl transition-colors shadow-sm">
+                        Guardar Cambios
                     </button>
                 </div>
             </form>
@@ -608,6 +964,24 @@
             }
         }
 
+        // Función auxiliar para renderizar badges coloridos de tipo de servicio
+        function getTipoBadge(tipo) {
+            const t = (tipo || 'incidencia').toLowerCase();
+            if (t.includes('inciden') || t.includes('fall')) {
+                return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">⚠️ Incidente</span>`;
+            } else if (t.includes('mantenim')) {
+                return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">🔧 Mantenimiento</span>`;
+            } else if (t.includes('requerim')) {
+                return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-sky-50 text-sky-700 border border-sky-200">📄 Requerimiento</span>`;
+            } else if (t.includes('contrat')) {
+                return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-indigo-50 text-indigo-700 border border-indigo-200">📑 Contrato</span>`;
+            } else if (t.includes('garant')) {
+                return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200">🛡️ Garantía</span>`;
+            } else {
+                return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-300">${tipo || 'Otros'}</span>`;
+            }
+        }
+
         // Asignación rápida solo ingresando Número de Ticket y Técnico
         async function handleQuickAssign(e) {
             e.preventDefault();
@@ -615,6 +989,8 @@
             const numTicket = document.getElementById('quick-ticket-input').value.trim();
             const idTecnico = document.getElementById('quick-tecnico-select').value;
             const tipoFormato = document.getElementById('quick-formato-select') ? document.getElementById('quick-formato-select').value : 'Multimarca';
+            const tipoServicio = document.getElementById('quick-tipo-select') ? document.getElementById('quick-tipo-select').value : 'incidencia';
+            const horaServicio = document.getElementById('quick-hora-input') ? document.getElementById('quick-hora-input').value : '09:00';
 
             if (!numTicket || !idTecnico) {
                 showToast('Ingrese el número de ticket y seleccione el técnico.', true);
@@ -635,7 +1011,9 @@
                     body: JSON.stringify({
                         numero_ticket: numTicket,
                         id_usuario_asignado: parseInt(idTecnico),
-                        tipo_formato: tipoFormato
+                        tipo_formato: tipoFormato,
+                        tipo_servicio: tipoServicio,
+                        hora_servicio: horaServicio
                     })
                 });
 
@@ -643,7 +1021,11 @@
                 if (data.success) {
                     showToast(data.message);
                     document.getElementById('quick-ticket-input').value = '';
-                    loadTickets();
+                    await loadTickets();
+                    const dashTab = document.getElementById('section-dashboard-tab');
+                    if (dashTab && !dashTab.classList.contains('hidden')) {
+                        loadDashboardSalidas();
+                    }
                 } else {
                     showToast(data.message || 'Error al asignar', true);
                 }
@@ -654,7 +1036,7 @@
                 btn.disabled = false;
                 btn.innerHTML = `
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                    <span>Asignar CAST</span>
+                    <span class="hidden lg:inline ml-1">Asignar</span>
                 `;
             }
         }
@@ -700,6 +1082,8 @@
                     (t.cliente && t.cliente.toLowerCase().includes(search)) ||
                     (t.usuario && t.usuario.toLowerCase().includes(search)) ||
                     (t.serie && t.serie.toLowerCase().includes(search)) ||
+                    (t.distrito && t.distrito.toLowerCase().includes(search)) ||
+                    (t.tipo_servicio && t.tipo_servicio.toLowerCase().includes(search)) ||
                     (t.nombre_tecnico && t.nombre_tecnico.toLowerCase().includes(search))
                 );
             }
@@ -744,6 +1128,8 @@
                         ? `cast_lexmark.html?ticket_id=${t.id_ticket}` 
                         : `cast_multimarca.html?ticket_id=${t.id_ticket}`;
 
+                    const horaFmt = t.hora_servicio ? t.hora_servicio.slice(0, 5) : '09:00';
+
                     return `
                         <tr class="hover:bg-slate-50/80 transition-colors">
                             <td class="py-3 px-4 font-mono font-bold text-[#1e3a8a] bg-blue-50/30">${t.numero_ticket}</td>
@@ -752,8 +1138,16 @@
                                 <div class="text-[11px] text-slate-500">${t.usuario || '-'}</div>
                             </td>
                             <td class="py-3 px-4">
-                                <div class="text-slate-800">${t.distrito || '-'}</div>
-                                <div class="text-[10px] text-slate-400 truncate max-w-[140px]">${t.direccion || ''}</div>
+                                <div class="flex items-center gap-1.5 font-mono text-[11px] text-slate-800 font-bold">
+                                    <span>📅 ${t.fecha_servicio || 'Hoy'}</span>
+                                    <span class="text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 text-[10px]">⏰ ${horaFmt}</span>
+                                </div>
+                                <div class="mt-1">
+                                    ${getTipoBadge(t.tipo_servicio)}
+                                </div>
+                                <div class="text-[11px] text-slate-500 mt-1 flex items-center gap-1">
+                                    <span>📍 ${t.distrito || '-'}</span>
+                                </div>
                             </td>
                             <td class="py-3 px-4">
                                 <div class="font-medium text-slate-800">${t.marca || ''} ${t.modelo || ''}</div>
@@ -763,11 +1157,17 @@
                             <td class="py-3 px-4">${tecnicoSelect}</td>
                             <td class="py-3 px-4">${estadoBadge}</td>
                             <td class="py-3 px-4 text-center">
-                                <a href="${castUrl}" target="_blank" 
-                                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold bg-[#1e3a8a] text-white hover:bg-[#172554] active:bg-[#0b1a30] transition-all shadow-sm">
-                                    <span>Abrir CAST</span>
-                                    <svg class="w-3 h-3 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                                </a>
+                                <div class="flex items-center justify-center gap-1.5">
+                                    <a href="${castUrl}" target="_blank" 
+                                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold bg-[#1e3a8a] text-white hover:bg-[#172554] active:bg-[#0b1a30] transition-all shadow-sm" title="Abrir Formato CAST">
+                                        <span>Abrir CAST</span>
+                                        <svg class="w-3 h-3 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                    </a>
+                                    <button onclick="openEditTicketModal(${t.id_ticket})"
+                                        class="p-1 rounded-md text-slate-600 hover:text-[#1e3a8a] hover:bg-blue-50 border border-slate-200 transition-colors" title="Editar / Reprogramar Ticket">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     `;
@@ -791,6 +1191,8 @@
                         estadoBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-amber-50 text-amber-800 border border-amber-300">Pendiente</span>`;
                     }
 
+                    const horaFmt = t.hora_servicio ? t.hora_servicio.slice(0, 5) : '09:00';
+
                     return `
                         <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3">
                             <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
@@ -805,8 +1207,15 @@
                                 <div class="text-xs text-slate-500 mt-0.5">👤 Contacto: <span class="text-slate-700 font-medium">${t.usuario || 'N/A'}</span></div>
                             </div>
 
-                            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-xs space-y-1">
-                                <div class="text-slate-600 flex items-start gap-1">
+                            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-xs space-y-1.5">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-1 font-mono text-[11px] font-bold text-slate-800">
+                                        <span>📅 ${t.fecha_servicio || 'Hoy'}</span>
+                                        <span class="text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 text-[10px]">⏰ ${horaFmt}</span>
+                                    </div>
+                                    ${getTipoBadge(t.tipo_servicio)}
+                                </div>
+                                <div class="text-slate-600 flex items-start gap-1 pt-1 border-t border-slate-200/50">
                                     <span class="text-slate-400 font-medium">📍</span>
                                     <span>${t.distrito || ''}${t.distrito && t.direccion ? ' - ' : ''}${t.direccion || 'Sin dirección'}</span>
                                 </div>
@@ -837,12 +1246,16 @@
                                 </div>
                             </div>
 
-                            <div class="pt-2 border-t border-slate-100">
+                            <div class="pt-2 border-t border-slate-100 flex items-center gap-2">
                                 <a href="${castUrl}" target="_blank" 
-                                    class="w-full py-2.5 px-3 rounded-xl bg-[#1e3a8a] hover:bg-[#172554] active:bg-[#0b1a30] text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all">
+                                    class="flex-1 py-2.5 px-3 rounded-xl bg-[#1e3a8a] hover:bg-[#172554] active:bg-[#0b1a30] text-white font-semibold text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all">
                                     <span>Abrir Formato CAST</span>
                                     <svg class="w-3.5 h-3.5 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                                 </a>
+                                <button onclick="openEditTicketModal(${t.id_ticket})" 
+                                    class="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-xs flex items-center justify-center border border-slate-200 transition-colors" title="Editar">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                </button>
                             </div>
                         </div>
                     `;
@@ -1053,12 +1466,241 @@
             }
         }
 
-        // Registro manual de tickets (Administrador y Dispatcher)
+        // ==========================================
+        // GESTIÓN DE PESTAÑAS (TICKETS VS DASHBOARD)
+        // ==========================================
+        function switchMainTab(tab) {
+            const ticketsSection = document.getElementById('section-tickets-tab');
+            const dashboardSection = document.getElementById('section-dashboard-tab');
+            const tabBtnTickets = document.getElementById('tab-btn-tickets');
+            const tabBtnDash = document.getElementById('tab-btn-dashboard');
+
+            if (tab === 'dashboard') {
+                ticketsSection.classList.add('hidden');
+                dashboardSection.classList.remove('hidden');
+
+                tabBtnDash.className = 'px-4 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-2 bg-[#1e3a8a] text-white shadow-sm';
+                tabBtnTickets.className = 'px-4 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-2 bg-slate-100 text-slate-700 hover:text-blue-900 hover:bg-blue-50 border border-slate-200';
+
+                const picker = document.getElementById('dash-date-picker');
+                if (picker && !picker.value) {
+                    const todayStr = new Date().toISOString().slice(0, 10);
+                    picker.value = todayStr;
+                }
+                loadDashboardSalidas(picker ? picker.value : null);
+            } else {
+                dashboardSection.classList.add('hidden');
+                ticketsSection.classList.remove('hidden');
+
+                tabBtnTickets.className = 'px-4 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-2 bg-[#1e3a8a] text-white shadow-sm';
+                tabBtnDash.className = 'px-4 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-2 bg-slate-100 text-slate-700 hover:text-blue-900 hover:bg-blue-50 border border-slate-200';
+            }
+        }
+
+        function setDashboardToday() {
+            const todayStr = new Date().toISOString().slice(0, 10);
+            const picker = document.getElementById('dash-date-picker');
+            if (picker) picker.value = todayStr;
+            loadDashboardSalidas(todayStr);
+        }
+
+        async function loadDashboardSalidas(fecha) {
+            const token = localStorage.getItem('cast_token');
+            const picker = document.getElementById('dash-date-picker');
+            const targetDate = fecha || (picker ? picker.value : '') || new Date().toISOString().slice(0, 10);
+
+            const tbody = document.getElementById('dash-table-body');
+            if (tbody) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400">Cargando reporte de salidas...</td></tr>`;
+            }
+
+            try {
+                const res = await fetch(`${API_BASE}/api/dashboard/salidas?fecha=${targetDate}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-rose-500 font-semibold">${data.message || 'Error al cargar reporte.'}</td></tr>`;
+                    return;
+                }
+
+                // Actualizar textos de cabecera y fecha
+                if (document.getElementById('dash-dia-display')) document.getElementById('dash-dia-display').textContent = data.dia_semana || 'HOY';
+                if (document.getElementById('dash-fecha-display')) document.getElementById('dash-fecha-display').textContent = data.fecha_formateada || data.fecha;
+                if (document.getElementById('dash-dia-capital')) document.getElementById('dash-dia-capital').textContent = `(${data.dia_capital || ''})`;
+                if (document.getElementById('dash-footer-fecha')) document.getElementById('dash-footer-fecha').textContent = data.fecha_formateada || data.fecha;
+                if (picker && data.fecha) picker.value = data.fecha;
+
+                // Actualizar métricas KPI
+                if (document.getElementById('dash-count-tecnicos')) document.getElementById('dash-count-tecnicos').textContent = data.resumen.tecnicos_count;
+                if (document.getElementById('dash-count-clientes')) document.getElementById('dash-count-clientes').textContent = data.resumen.clientes_count;
+                if (document.getElementById('dash-count-distritos')) document.getElementById('dash-count-distritos').textContent = data.resumen.distritos_count;
+                if (document.getElementById('dash-count-incidentes')) document.getElementById('dash-count-incidentes').textContent = data.resumen.tipos.incidentes;
+                if (document.getElementById('dash-count-mantenimientos')) document.getElementById('dash-count-mantenimientos').textContent = data.resumen.tipos.mantenimientos;
+                if (document.getElementById('dash-count-requerimientos')) document.getElementById('dash-count-requerimientos').textContent = data.resumen.tipos.requerimientos;
+
+                // Renderizar tabla
+                if (tbody) {
+                    if (!data.salidas || data.salidas.length === 0) {
+                        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-slate-400 font-medium bg-slate-50/50">No hay salidas programadas para esta fecha.</td></tr>`;
+                        return;
+                    }
+
+                    tbody.innerHTML = data.salidas.map(t => {
+                        const castUrl = t.tipo_formato === 'Lexmark' 
+                            ? `cast_lexmark.html?ticket_id=${t.id_ticket}` 
+                            : `cast_multimarca.html?ticket_id=${t.id_ticket}`;
+                        
+                        const horaFormat = t.hora_servicio ? t.hora_servicio.slice(0, 5) : '09:00';
+                        const tecnicoDisplay = t.nombre_tecnico 
+                            ? `<span class="font-black text-slate-900">${t.nombre_tecnico.toUpperCase()}</span>` 
+                            : `<span class="text-amber-600 font-bold italic bg-amber-50 px-2 py-0.5 rounded border border-amber-200">SIN ASIGNAR</span>`;
+
+                        return `
+                            <tr class="hover:bg-sky-50/40 transition-colors">
+                                <td class="py-3.5 px-4 font-mono font-black text-sm text-[#0f2942] text-center bg-sky-50/20">
+                                    ${horaFormat}
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    ${tecnicoDisplay}
+                                    ${t.telefono_tecnico ? `<div class="text-[10px] text-slate-400 font-mono">📱 ${t.telefono_tecnico}</div>` : ''}
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    <div class="font-black text-xs text-[#0f2942]">${t.cliente ? t.cliente.toUpperCase() : '-'}</div>
+                                    <div class="text-[11px] text-slate-500 font-medium">${t.usuario || ''}</div>
+                                </td>
+                                <td class="py-3.5 px-4">
+                                    <div class="font-extrabold text-xs text-slate-800">${t.distrito ? t.distrito.toUpperCase() : '-'}</div>
+                                    ${t.direccion ? `<div class="text-[10px] text-slate-400 truncate max-w-xs" title="${t.direccion}">${t.direccion}</div>` : ''}
+                                </td>
+                                <td class="py-3.5 px-4 text-center whitespace-nowrap">
+                                    ${getTipoBadge(t.tipo_servicio)}
+                                </td>
+                                <td class="py-3.5 px-3 text-center no-print">
+                                    <div class="flex items-center justify-center gap-1.5">
+                                        <a href="${castUrl}" target="_blank" 
+                                            class="px-2.5 py-1 bg-[#0b4d82] hover:bg-[#073459] text-white rounded-lg font-bold text-[11px] shadow-xs inline-flex items-center gap-1 transition-colors" title="Abrir Formato CAST">
+                                            <span>CAST</span>
+                                            <svg class="w-3 h-3 text-sky-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                        </a>
+                                        <button onclick="openEditTicketModal(${t.id_ticket})" 
+                                            class="p-1 text-slate-600 hover:text-slate-900 border border-slate-200 rounded-lg hover:bg-slate-100 transition-colors" title="Editar / Reprogramar">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    }).join('');
+                }
+            } catch (err) {
+                console.error('Error al cargar dashboard de salidas:', err);
+                if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-rose-500 font-semibold">Error de red al consultar el reporte.</td></tr>`;
+            }
+        }
+
+        // ==========================================
+        // MODAL: EDITAR / PROGRAMAR TICKET
+        // ==========================================
+        function openEditTicketModal(ticketId) {
+            const t = allTickets.find(item => item.id_ticket === ticketId);
+            if (!t) {
+                showToast('Ticket no encontrado.', true);
+                return;
+            }
+
+            document.getElementById('et-id-ticket').value = t.id_ticket;
+            document.getElementById('et-numero-display').textContent = t.numero_ticket;
+            document.getElementById('et-cliente-display').textContent = `${t.cliente} (${t.usuario || ''})`;
+            document.getElementById('et-tipo-servicio').value = t.tipo_servicio || 'incidencia';
+            document.getElementById('et-formato').value = t.tipo_formato || 'Multimarca';
+            document.getElementById('et-fecha-servicio').value = t.fecha_servicio ? t.fecha_servicio.slice(0, 10) : new Date().toISOString().slice(0, 10);
+            document.getElementById('et-hora-servicio').value = t.hora_servicio ? t.hora_servicio.slice(0, 5) : '09:00';
+            document.getElementById('et-distrito').value = t.distrito || '';
+            document.getElementById('et-estado').value = t.estado_ticket || 'Pendiente';
+
+            // Poblar dropdown de técnicos
+            const selTecnico = document.getElementById('et-tecnico');
+            selTecnico.innerHTML = '<option value="">-- Sin Asignar --</option>' +
+                (allTecnicos || []).map(tec => `
+                    <option value="${tec.id_usuario}" ${t.id_usuario_asignado === tec.id_usuario ? 'selected' : ''}>
+                        ${tec.nombre}
+                    </option>
+                `).join('');
+
+            document.getElementById('edit-ticket-modal').classList.remove('hidden');
+        }
+
+        function closeEditTicketModal() {
+            document.getElementById('edit-ticket-modal').classList.add('hidden');
+        }
+
+        async function submitEditTicket(e) {
+            e.preventDefault();
+            const token = localStorage.getItem('cast_token');
+            const ticketId = document.getElementById('et-id-ticket').value;
+            const tecnicoVal = document.getElementById('et-tecnico').value;
+
+            const payload = {
+                tipo_servicio: document.getElementById('et-tipo-servicio').value,
+                tipo_formato: document.getElementById('et-formato').value,
+                fecha_servicio: document.getElementById('et-fecha-servicio').value || null,
+                hora_servicio: document.getElementById('et-hora-servicio').value || '09:00',
+                id_usuario_asignado: tecnicoVal ? parseInt(tecnicoVal) : null,
+                distrito: document.getElementById('et-distrito').value.trim() || null,
+                estado_ticket: document.getElementById('et-estado').value
+            };
+
+            const btn = document.getElementById('et-btn-submit');
+            btn.disabled = true;
+            btn.textContent = 'Guardando...';
+
+            try {
+                const res = await fetch(`${API_BASE}/api/tickets/${ticketId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Programación de ticket actualizada correctamente.');
+                    closeEditTicketModal();
+                    await loadTickets();
+                    const dashSection = document.getElementById('section-dashboard-tab');
+                    if (dashSection && !dashSection.classList.contains('hidden')) {
+                        loadDashboardSalidas();
+                    }
+                } else {
+                    showToast(data.message || 'Error al actualizar ticket.', true);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error de red al actualizar ticket.', true);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Guardar Cambios';
+            }
+        }
+
+        // ==========================================
+        // REGISTRO MANUAL DE TICKETS
+        // ==========================================
         function openNewTicketModal() {
             document.getElementById('new-ticket-form').reset();
             const sel = document.getElementById('nt-tecnico');
             sel.innerHTML = '<option value="">-- Sin asignar --</option>' +
                 (allTecnicos || []).map(t => `<option value="${t.id_usuario}">${t.nombre}</option>`).join('');
+            
+            const todayStr = new Date().toISOString().slice(0, 10);
+            const fechaInput = document.getElementById('nt-fecha-servicio');
+            if (fechaInput) fechaInput.value = todayStr;
+            const horaInput = document.getElementById('nt-hora-servicio');
+            if (horaInput) horaInput.value = '09:00';
+
             document.getElementById('new-ticket-modal').classList.remove('hidden');
             setTimeout(() => document.getElementById('nt-numero').focus(), 50);
         }
@@ -1069,7 +1711,7 @@
 
         async function submitNewTicket(e) {
             e.preventDefault();
-            const val = id => document.getElementById(id).value.trim();
+            const val = id => document.getElementById(id) ? document.getElementById(id).value.trim() : '';
             const tecnicoId = val('nt-tecnico');
 
             const payload = {
@@ -1084,6 +1726,9 @@
                 marca: val('nt-marca'),
                 modelo: val('nt-modelo'),
                 serie: val('nt-serie'),
+                tipo_servicio: val('nt-tipo-servicio') || 'incidencia',
+                fecha_servicio: val('nt-fecha-servicio') || null,
+                hora_servicio: val('nt-hora-servicio') || '09:00',
                 requerimiento: val('nt-requerimiento'),
                 incidencia: val('nt-incidencia')
             };
@@ -1123,8 +1768,12 @@
 
                 showToast(`Ticket '${payload.numero_ticket}' registrado correctamente.`);
                 closeNewTicketModal();
-                loadTickets();
-                loadTecnicos();
+                await loadTickets();
+                await loadTecnicos();
+                const dashSection = document.getElementById('section-dashboard-tab');
+                if (dashSection && !dashSection.classList.contains('hidden')) {
+                    loadDashboardSalidas();
+                }
             } catch (err) {
                 console.error(err);
                 showToast('Error de conexión al registrar el ticket.', true);
