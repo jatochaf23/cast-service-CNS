@@ -451,6 +451,211 @@ app.post('/api/tickets', authMiddleware, requireRoles(1, 2), async (req, res) =>
     }
 });
 
+// Importar tickets masivamente desde Excel (Administrador y Dispatcher)
+app.post('/api/tickets/importar-masivo', authMiddleware, requireRoles(1, 2), async (req, res) => {
+    try {
+        const { tickets, modo_duplicado } = req.body;
+        // modo_duplicado: 'actualizar' (default) o 'omitir'
+
+        if (!Array.isArray(tickets) || tickets.length === 0) {
+            return res.status(400).json({ success: false, message: 'No se recibieron datos de tickets para importar.' });
+        }
+
+        // Obtener lista de técnicos para mapeo automático por nombre o correo
+        const [tecnicos] = await pool.query("SELECT id_usuario, LOWER(TRIM(nombre)) as nombre_clean, LOWER(TRIM(correo)) as correo_clean FROM usuarios WHERE id_rol = 3 AND estado = 'Activo'");
+
+        let creados = 0;
+        let actualizados = 0;
+        let omitidos = 0;
+        const errores = [];
+
+        for (let i = 0; i < tickets.length; i++) {
+            const raw = tickets[i];
+            const numTicket = (raw.numero_ticket || raw.ticket || raw.nro_ticket || '').toString().trim();
+            const cliente = (raw.cliente || raw.empresa || '').toString().trim();
+
+            if (!numTicket) {
+                errores.push(`Fila ${i + 1}: N° de ticket vacío.`);
+                continue;
+            }
+            if (!cliente) {
+                errores.push(`Fila ${i + 1} (${numTicket}): Nombre de cliente vacío.`);
+                continue;
+            }
+
+            const usuario = (raw.usuario || raw.contacto || '-').toString().trim();
+            const direccion = raw.direccion ? raw.direccion.toString().trim() : null;
+            const telefono = raw.telefono ? raw.telefono.toString().trim() : null;
+            const distrito = raw.distrito ? raw.distrito.toString().trim() : null;
+            const marca = raw.marca ? raw.marca.toString().trim() : null;
+            const modelo = raw.modelo ? raw.modelo.toString().trim() : null;
+            const serie = raw.serie ? raw.serie.toString().trim() : null;
+            const requerimiento = raw.requerimiento ? raw.requerimiento.toString().trim() : null;
+            const incidencia = raw.incidencia ? raw.incidencia.toString().trim() : null;
+
+            // Formato: Multimarca o Lexmark
+            let tipoFormato = (raw.tipo_formato || raw.formato || '').toString().trim();
+            if (!tipoFormato) {
+                tipoFormato = (marca && marca.toLowerCase().includes('lexmark')) ? 'Lexmark' : 'Multimarca';
+            } else if (tipoFormato.toLowerCase().includes('lex')) {
+                tipoFormato = 'Lexmark';
+            } else {
+                tipoFormato = 'Multimarca';
+            }
+
+            // Tipo Servicio: incidencia, requerimiento, mantenimiento, contrato, garantia, otros
+            let tipoServicio = (raw.tipo_servicio || raw.servicio || 'incidencia').toString().trim().toLowerCase();
+            if (tipoServicio.includes('requer')) tipoServicio = 'requerimiento';
+            else if (tipoServicio.includes('manten')) tipoServicio = 'mantenimiento';
+            else if (tipoServicio.includes('contra')) tipoServicio = 'contrato';
+            else if (tipoServicio.includes('garan')) tipoServicio = 'garantia';
+            else if (tipoServicio.includes('otro')) tipoServicio = 'otros';
+            else tipoServicio = 'incidencia';
+
+            // Salida Directa: true por defecto
+            let salidaDirecta = true;
+            if (raw.salida_directa !== undefined && raw.salida_directa !== null) {
+                const sdVal = raw.salida_directa.toString().trim().toLowerCase();
+                if (sdVal === 'no' || sdVal === 'false' || sdVal === '0') {
+                    salidaDirecta = false;
+                }
+            }
+
+            // Fecha y hora de servicio
+            let fechaServicio = raw.fecha_servicio ? raw.fecha_servicio.toString().trim() : null;
+            if (fechaServicio && !/^\d{4}-\d{2}-\d{2}$/.test(fechaServicio)) {
+                const parts = fechaServicio.split(/[/.-]/);
+                if (parts.length === 3 && parts[2].length === 4) {
+                    fechaServicio = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+                }
+            }
+            const horaServicio = (raw.hora_servicio || raw.hora || '09:00').toString().trim().slice(0, 5);
+
+            // Mapear técnico si viene especificado
+            let idTecnicoAsignado = null;
+            if (raw.id_usuario_asignado) {
+                idTecnicoAsignado = parseInt(raw.id_usuario_asignado);
+            } else if (raw.tecnico || raw.nombre_tecnico) {
+                const tecQuery = (raw.tecnico || raw.nombre_tecnico).toString().toLowerCase().trim();
+                const matched = tecnicos.find(t => 
+                    t.nombre_clean.includes(tecQuery) || 
+                    tecQuery.includes(t.nombre_clean) ||
+                    t.correo_clean === tecQuery
+                );
+                if (matched) {
+                    idTecnicoAsignado = matched.id_usuario;
+                }
+            }
+
+            // Comprobar si el ticket ya existe
+            const [exists] = await pool.query('SELECT id_ticket, estado_ticket FROM ticket WHERE LOWER(TRIM(numero_ticket)) = LOWER(TRIM(?))', [numTicket]);
+
+            if (exists.length > 0) {
+                if (modo_duplicado === 'omitir') {
+                    omitidos++;
+                    continue;
+                }
+
+                // Actualizar ticket existente
+                const ticketExistente = exists[0];
+                const nuevoEstado = idTecnicoAsignado ? (ticketExistente.estado_ticket === 'Atendido' ? 'Atendido' : 'En Proceso') : ticketExistente.estado_ticket;
+
+                await pool.query(
+                    `UPDATE ticket 
+                     SET cliente = ?,
+                         usuario = ?,
+                         direccion = COALESCE(?, direccion),
+                         telefono = COALESCE(?, telefono),
+                         distrito = COALESCE(?, distrito),
+                         marca = COALESCE(?, marca),
+                         modelo = COALESCE(?, modelo),
+                         serie = COALESCE(?, serie),
+                         requerimiento = COALESCE(?, requerimiento),
+                         incidencia = COALESCE(?, incidencia),
+                         tipo_formato = ?,
+                         tipo_servicio = ?,
+                         fecha_servicio = COALESCE(?::date, fecha_servicio),
+                         hora_servicio = COALESCE(?, hora_servicio),
+                         salida_directa = ?,
+                         id_usuario_asignado = CASE WHEN ? IS NOT NULL THEN ? ELSE id_usuario_asignado END,
+                         estado_ticket = ?,
+                         actualizado_en = CURRENT_TIMESTAMP
+                     WHERE id_ticket = ?`,
+                    [
+                        cliente,
+                        usuario,
+                        direccion,
+                        telefono,
+                        distrito,
+                        marca,
+                        modelo,
+                        serie,
+                        requerimiento,
+                        incidencia,
+                        tipoFormato,
+                        tipoServicio,
+                        fechaServicio,
+                        horaServicio,
+                        salidaDirecta,
+                        idTecnicoAsignado,
+                        idTecnicoAsignado,
+                        nuevoEstado,
+                        ticketExistente.id_ticket
+                    ]
+                );
+                actualizados++;
+            } else {
+                // Insertar nuevo ticket
+                const estadoInicial = idTecnicoAsignado ? 'En Proceso' : 'Pendiente';
+                await pool.query(
+                    `INSERT INTO ticket (
+                        numero_ticket, id_usuario_asignado, cliente, usuario, direccion,
+                        telefono, distrito, marca, modelo, serie, requerimiento,
+                        incidencia, estado_ticket, tipo_formato, fecha_servicio,
+                        hora_servicio, tipo_servicio, salida_directa
+                     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, COALESCE(?::date, CURRENT_DATE), ?, ?, ?)`,
+                    [
+                        numTicket,
+                        idTecnicoAsignado,
+                        cliente,
+                        usuario,
+                        direccion,
+                        telefono,
+                        distrito,
+                        marca,
+                        modelo,
+                        serie,
+                        requerimiento,
+                        incidencia,
+                        estadoInicial,
+                        tipoFormato,
+                        fechaServicio,
+                        horaServicio,
+                        tipoServicio,
+                        salidaDirecta
+                    ]
+                );
+                creados++;
+            }
+        }
+
+        console.log(`📊 Importación masiva completada: ${creados} creados, ${actualizados} actualizados, ${omitidos} omitidos, ${errores.length} errores.`);
+
+        res.json({
+            success: true,
+            message: `Procesamiento completado: ${creados} nuevos, ${actualizados} actualizados, ${omitidos} omitidos.`,
+            total: tickets.length,
+            creados,
+            actualizados,
+            omitidos,
+            errores
+        });
+    } catch (err) {
+        console.error('Error en importación masiva de tickets:', err);
+        res.status(500).json({ success: false, message: 'Error interno al procesar archivo de tickets.' });
+    }
+});
+
 // Actualizar ticket (Administrador y Dispatcher)
 app.put('/api/tickets/:id', authMiddleware, requireRoles(1, 2), async (req, res) => {
     try {

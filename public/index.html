@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal CAST - Gestión de Constancias de Servicio Técnico</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/xlsx.full.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -78,7 +79,15 @@
                         <span>Salidas a Servicio (Dashboard)</span>
                     </button>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <button id="btn-import-excel" onclick="openImportExcelModal()" class="inline-flex items-center gap-1.5 px-3 py-2 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs sm:text-sm rounded-xl border border-emerald-800 shadow-sm transition-all" title="Subir e importar tickets desde Excel">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                        <span>Subir Excel</span>
+                    </button>
+                    <button id="btn-export-excel" onclick="exportTicketsToExcel()" class="inline-flex items-center gap-1.5 px-3 py-2 bg-white hover:bg-emerald-50 text-emerald-800 font-semibold text-xs sm:text-sm rounded-xl border border-emerald-300 shadow-sm transition-all" title="Descargar tickets en formato Excel (.xlsx)">
+                        <svg class="w-4 h-4 text-emerald-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span>Descargar Excel</span>
+                    </button>
                     <button id="btn-new-ticket" onclick="openNewTicketModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-[#1e3a8a] hover:bg-[#172554] text-white font-semibold text-xs sm:text-sm rounded-xl border border-[#2d52a8] shadow-sm transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         <span>Nuevo Ticket</span>
@@ -892,6 +901,101 @@
                 <button type="button" id="delete-modal-confirm-btn" onclick="executeDeleteTicket()" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white text-xs font-bold rounded-xl transition-colors shadow-sm flex items-center gap-1.5">
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     <span>Eliminar</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SUBIR E IMPORTAR TICKETS DESDE EXCEL -->
+    <div id="import-excel-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-100 max-h-[92vh] flex flex-col">
+            <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700 shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-900 leading-tight">Subir Tickets desde Excel</h3>
+                        <p class="text-xs text-slate-500">Cargue masivamente tickets desde un archivo .xlsx o .xls</p>
+                    </div>
+                </div>
+                <button onclick="closeImportExcelModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="overflow-y-auto flex-1 pr-1 space-y-4 text-xs">
+                <!-- Barra de Descarga de Plantilla -->
+                <div class="p-3 bg-emerald-50/70 rounded-xl border border-emerald-200 flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-2">
+                        <span class="text-emerald-700 font-bold">💡</span>
+                        <p class="text-xs text-emerald-900">¿No tienes el formato? Descarga la plantilla predeterminada con columnas de ejemplo.</p>
+                    </div>
+                    <button type="button" onclick="downloadExcelTemplate()" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold rounded-lg transition-colors whitespace-nowrap shadow-xs flex items-center gap-1.5 shrink-0">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        <span>Descargar Plantilla</span>
+                    </button>
+                </div>
+
+                <!-- Zona de Selección / Arrastre de Archivo -->
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1.5">Seleccionar Archivo Excel (.xlsx, .xls)</label>
+                    <div id="drop-zone" onclick="document.getElementById('excel-file-input').click()"
+                        class="border-2 border-dashed border-slate-300 hover:border-emerald-600 rounded-2xl p-6 text-center cursor-pointer bg-slate-50 hover:bg-emerald-50/40 transition-all">
+                        <input type="file" id="excel-file-input" accept=".xlsx, .xls" class="hidden" onchange="handleExcelFileSelect(event)">
+                        <div class="w-12 h-12 bg-white rounded-xl shadow-xs border border-slate-200 mx-auto flex items-center justify-center text-emerald-700 mb-2">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                        </div>
+                        <p id="file-name-label" class="font-bold text-slate-800 text-sm">Haga clic o arrastre aquí su archivo Excel</p>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Soporta formatos estándar .xlsx y .xls</p>
+                    </div>
+                </div>
+
+                <!-- Opciones de importación -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Si el ticket ya existe en la BD:</label>
+                        <select id="import-modo-duplicado" class="w-full px-2.5 py-1.5 border border-slate-300 rounded-lg bg-white font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            <option value="actualizar" selected>Actualizar datos del ticket existente</option>
+                            <option value="omitir">Omitir (mantener datos existentes)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Total de registros leídos:</label>
+                        <div id="import-preview-count" class="font-bold text-emerald-800 py-1.5 text-xs">Ningún archivo cargado aún</div>
+                    </div>
+                </div>
+
+                <!-- Vista previa de tickets leídos -->
+                <div id="import-preview-section" class="hidden space-y-2">
+                    <p class="font-bold text-slate-700 text-xs">Vista Previa de Filas a Importar (primeras 5):</p>
+                    <div class="overflow-x-auto max-h-48 border border-slate-200 rounded-xl">
+                        <table class="w-full text-left text-[11px]">
+                            <thead class="bg-slate-100 text-slate-600 font-bold uppercase text-[10px] sticky top-0">
+                                <tr>
+                                    <th class="p-2">Ticket</th>
+                                    <th class="p-2">Cliente</th>
+                                    <th class="p-2">Contacto</th>
+                                    <th class="p-2">Distrito</th>
+                                    <th class="p-2">Serie</th>
+                                    <th class="p-2">Tipo</th>
+                                    <th class="p-2">Fecha/Hora</th>
+                                </tr>
+                            </thead>
+                            <tbody id="import-preview-tbody" class="divide-y divide-slate-100 bg-white">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100 mt-2">
+                <button type="button" onclick="closeImportExcelModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">
+                    Cancelar
+                </button>
+                <button type="button" id="btn-confirm-import" onclick="confirmImportExcel()" disabled class="px-4 py-2 bg-emerald-700 hover:bg-emerald-800 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl transition-colors shadow-sm flex items-center gap-1.5">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span>Confirmar e Importar</span>
                 </button>
             </div>
         </div>
@@ -2081,6 +2185,315 @@
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Actualizar Contraseña';
+            }
+        }
+
+        // ==========================================
+        // EXPORTACIÓN Y CARGA DE TICKETS DESDE EXCEL
+        // ==========================================
+        let parsedExcelTickets = [];
+
+        function exportTicketsToExcel() {
+            if (!window.XLSX) {
+                showToast('La biblioteca Excel está cargando. Espere un momento.', true);
+                return;
+            }
+
+            const search = document.getElementById('search-input') ? document.getElementById('search-input').value.toLowerCase().trim() : '';
+            let ticketsToExport = allTickets;
+            if (currentFilter !== 'Todos') {
+                ticketsToExport = ticketsToExport.filter(t => t.estado_ticket === currentFilter);
+            }
+            if (search) {
+                ticketsToExport = ticketsToExport.filter(t => 
+                    (t.numero_ticket && t.numero_ticket.toLowerCase().includes(search)) ||
+                    (t.cliente && t.cliente.toLowerCase().includes(search)) ||
+                    (t.usuario && t.usuario.toLowerCase().includes(search)) ||
+                    (t.serie && t.serie.toLowerCase().includes(search)) ||
+                    (t.distrito && t.distrito.toLowerCase().includes(search)) ||
+                    (t.tipo_servicio && t.tipo_servicio.toLowerCase().includes(search)) ||
+                    (t.nombre_tecnico && t.nombre_tecnico.toLowerCase().includes(search))
+                );
+            }
+
+            if (ticketsToExport.length === 0) {
+                showToast('No hay tickets para exportar en la vista actual.', true);
+                return;
+            }
+
+            const data = ticketsToExport.map(t => ({
+                'N° TICKET': t.numero_ticket || '',
+                'CLIENTE': t.cliente || '',
+                'USUARIO / CONTACTO': t.usuario || '',
+                'TELÉFONO': t.telefono || '',
+                'DISTRITO': t.distrito || '',
+                'DIRECCIÓN': t.direccion || '',
+                'MARCA': t.marca || '',
+                'MODELO': t.modelo || '',
+                'SERIE': t.serie || '',
+                'TIPO SERVICIO': (t.tipo_servicio || 'incidencia').toUpperCase(),
+                'FECHA SERVICIO': t.fecha_servicio || '',
+                'HORA': t.hora_servicio ? t.hora_servicio.slice(0, 5) : '09:00',
+                'SALIDA DIRECTA': t.salida_directa !== false ? 'SI' : 'NO',
+                'FORMATO CAST': t.tipo_formato || 'Multimarca',
+                'TÉCNICO ASIGNADO': t.nombre_tecnico || 'Sin Asignar',
+                'ESTADO': t.estado_ticket || 'Pendiente',
+                'REQUERIMIENTO': t.requerimiento || '',
+                'INCIDENCIA': t.incidencia || '',
+                'N° CAST': t.numero_cast || '',
+                'FALLA REAL': t.falla_real || '',
+                'ACTIVIDAD REALIZADA': t.actividad_realizada || ''
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(data);
+            worksheet['!cols'] = [
+                { wch: 14 }, { wch: 32 }, { wch: 22 }, { wch: 14 },
+                { wch: 18 }, { wch: 30 }, { wch: 14 }, { wch: 16 },
+                { wch: 18 }, { wch: 16 }, { wch: 14 }, { wch: 8 },
+                { wch: 14 }, { wch: 14 }, { wch: 22 }, { wch: 12 },
+                { wch: 25 }, { wch: 25 }, { wch: 14 }, { wch: 25 }, { wch: 35 }
+            ];
+
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Tickets');
+
+            const d = new Date();
+            const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+            XLSX.writeFile(workbook, `Tickets_CNS_${dateStr}.xlsx`);
+            showToast(`Se exportaron ${ticketsToExport.length} tickets a Excel exitosamente.`);
+        }
+
+        function downloadExcelTemplate() {
+            if (!window.XLSX) {
+                showToast('La biblioteca Excel está cargando.', true);
+                return;
+            }
+
+            const templateData = [
+                {
+                    'N° TICKET': 'TCK-2026-001',
+                    'CLIENTE': 'EMPRESA EJEMPLO S.A.C.',
+                    'USUARIO / CONTACTO': 'Juan Pérez',
+                    'TELÉFONO': '999888777',
+                    'DISTRITO': 'SAN ISIDRO',
+                    'DIRECCIÓN': 'Av. Rivera Navarrete 501',
+                    'MARCA': 'Lexmark',
+                    'MODELO': 'MS810dn',
+                    'SERIE': '702014022',
+                    'TIPO SERVICIO': 'Incidencia',
+                    'FECHA SERVICIO': '2026-10-10',
+                    'HORA': '09:00',
+                    'SALIDA DIRECTA': 'SI',
+                    'FORMATO CAST': 'Lexmark',
+                    'TÉCNICO': 'Hermes Jayo',
+                    'REQUERIMIENTO': 'Mantenimiento preventivo e inspección',
+                    'INCIDENCIA': 'Atasco en bandeja 1'
+                },
+                {
+                    'N° TICKET': 'TCK-2026-002',
+                    'CLIENTE': 'SUPERMERCADOS PERUANOS S.A.',
+                    'USUARIO / CONTACTO': 'María Gómez',
+                    'TELÉFONO': '987654321',
+                    'DISTRITO': 'PUNTA NEGRA',
+                    'DIRECCIÓN': 'Panamericana Sur Km 45',
+                    'MARCA': 'HP',
+                    'MODELO': 'LaserJet M404',
+                    'SERIE': 'VNB3B01234',
+                    'TIPO SERVICIO': 'Mantenimiento',
+                    'FECHA SERVICIO': '2026-10-10',
+                    'HORA': '10:30',
+                    'SALIDA DIRECTA': 'SI',
+                    'FORMATO CAST': 'Multimarca',
+                    'TÉCNICO': '',
+                    'REQUERIMIENTO': 'Revisión técnica periódica',
+                    'INCIDENCIA': 'Manchas negras en el borde derecho'
+                }
+            ];
+
+            const worksheet = XLSX.utils.json_to_sheet(templateData);
+            worksheet['!cols'] = [
+                { wch: 15 }, { wch: 30 }, { wch: 20 }, { wch: 14 },
+                { wch: 18 }, { wch: 28 }, { wch: 12 }, { wch: 16 },
+                { wch: 16 }, { wch: 15 }, { wch: 15 }, { wch: 8 },
+                { wch: 14 }, { wch: 14 }, { wch: 18 }, { wch: 30 }, { wch: 30 }
+            ];
+
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Plantilla');
+            XLSX.writeFile(workbook, 'Plantilla_Carga_Tickets.xlsx');
+        }
+
+        function openImportExcelModal() {
+            parsedExcelTickets = [];
+            const fileInput = document.getElementById('excel-file-input');
+            if (fileInput) fileInput.value = '';
+            document.getElementById('file-name-label').textContent = 'Haga clic o arrastre aquí su archivo Excel';
+            document.getElementById('import-preview-count').textContent = 'Ningún archivo cargado aún';
+            document.getElementById('import-preview-section').classList.add('hidden');
+            document.getElementById('import-preview-tbody').innerHTML = '';
+            document.getElementById('btn-confirm-import').disabled = true;
+            document.getElementById('import-excel-modal').classList.remove('hidden');
+        }
+
+        function closeImportExcelModal() {
+            document.getElementById('import-excel-modal').classList.add('hidden');
+            parsedExcelTickets = [];
+        }
+
+        function handleExcelFileSelect(e) {
+            const files = e.target.files || (e.dataTransfer && e.dataTransfer.files);
+            if (!files || files.length === 0) return;
+
+            const file = files[0];
+            document.getElementById('file-name-label').textContent = `📄 ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+
+            const reader = new FileReader();
+            reader.onload = function(evt) {
+                try {
+                    const data = new Uint8Array(evt.target.result);
+                    const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const rows = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: false });
+
+                    if (!rows || rows.length === 0) {
+                        showToast('El archivo Excel no contiene filas de datos.', true);
+                        return;
+                    }
+
+                    // Función normalizadora de nombres de columna
+                    const cleanKey = k => k.toString().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "");
+
+                    parsedExcelTickets = rows.map(r => {
+                        const rowObj = {};
+                        for (const key of Object.keys(r)) {
+                            const val = r[key] !== undefined && r[key] !== null ? r[key].toString().trim() : '';
+                            const k = cleanKey(key);
+
+                            if (k.includes('ticket') || k === 'nroticket' || k === 'noticket' || k === 'numticket') {
+                                rowObj.numero_ticket = val;
+                            } else if (k.includes('cliente') || k.includes('empresa') || k.includes('razonsocial')) {
+                                rowObj.cliente = val;
+                            } else if (k.includes('usuario') || k.includes('contacto')) {
+                                rowObj.usuario = val;
+                            } else if (k.includes('telefono') || k.includes('celular') || k.includes('fono')) {
+                                rowObj.telefono = val;
+                            } else if (k.includes('distrito') || k.includes('ciudad')) {
+                                rowObj.distrito = val;
+                            } else if (k.includes('direccion') || k.includes('sede') || k.includes('ubicacion')) {
+                                rowObj.direccion = val;
+                            } else if (k === 'marca') {
+                                rowObj.marca = val;
+                            } else if (k === 'modelo') {
+                                rowObj.modelo = val;
+                            } else if (k.includes('serie') || k === 'sn') {
+                                rowObj.serie = val;
+                            } else if (k.includes('tiposervicio') || k === 'servicio' || k === 'tipo') {
+                                rowObj.tipo_servicio = val;
+                            } else if (k.includes('fechaservicio') || k.includes('fechaprogramada') || k.includes('fechasalida') || k === 'fecha') {
+                                rowObj.fecha_servicio = val;
+                            } else if (k.includes('horaservicio') || k.includes('horaprogramada') || k === 'hora') {
+                                rowObj.hora_servicio = val;
+                            } else if (k.includes('salidadirecta') || k === 'directa') {
+                                rowObj.salida_directa = val;
+                            } else if (k.includes('formato') || k === 'tipoformato') {
+                                rowObj.tipo_formato = val;
+                            } else if (k.includes('tecnico')) {
+                                rowObj.tecnico = val;
+                            } else if (k.includes('requerimiento') || k.includes('solicitud')) {
+                                rowObj.requerimiento = val;
+                            } else if (k.includes('incidencia') || k.includes('falla') || k.includes('problema')) {
+                                rowObj.incidencia = val;
+                            }
+                        }
+                        return rowObj;
+                    }).filter(t => t.numero_ticket && t.cliente);
+
+                    if (parsedExcelTickets.length === 0) {
+                        showToast('No se encontraron registros válidos. Verifique que las columnas "N° Ticket" y "Cliente" estén presentes.', true);
+                        document.getElementById('btn-confirm-import').disabled = true;
+                        document.getElementById('import-preview-count').textContent = '0 tickets válidos detectados';
+                        return;
+                    }
+
+                    document.getElementById('import-preview-count').textContent = `✅ ${parsedExcelTickets.length} tickets válidos detectados`;
+                    document.getElementById('btn-confirm-import').disabled = false;
+                    document.getElementById('btn-confirm-import').innerHTML = `
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        <span>Confirmar e Importar (${parsedExcelTickets.length} tickets)</span>
+                    `;
+
+                    // Mostrar tabla previa (primeras 5)
+                    const previewRows = parsedExcelTickets.slice(0, 5);
+                    const tbody = document.getElementById('import-preview-tbody');
+                    tbody.innerHTML = previewRows.map(r => `
+                        <tr>
+                            <td class="p-2 font-mono font-bold text-[#1e3a8a]">${r.numero_ticket}</td>
+                            <td class="p-2 font-semibold text-slate-800">${r.cliente}</td>
+                            <td class="p-2 text-slate-600">${r.usuario || '-'}</td>
+                            <td class="p-2 text-slate-600">${r.distrito || '-'}</td>
+                            <td class="p-2 font-mono text-slate-500">${r.serie || '-'}</td>
+                            <td class="p-2 text-slate-700 font-medium">${r.tipo_servicio || 'Incidencia'}</td>
+                            <td class="p-2 font-mono text-slate-600">${r.fecha_servicio || 'Hoy'} ${r.hora_servicio || '09:00'}</td>
+                        </tr>
+                    `).join('');
+                    document.getElementById('import-preview-section').classList.remove('hidden');
+
+                } catch (err) {
+                    console.error('Error al procesar archivo Excel:', err);
+                    showToast('Error al leer el archivo Excel. Asegúrese de que sea un archivo válido.', true);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function confirmImportExcel() {
+            if (!parsedExcelTickets || parsedExcelTickets.length === 0) {
+                showToast('No hay tickets para importar.', true);
+                return;
+            }
+
+            const token = localStorage.getItem('cast_token');
+            const modo = document.getElementById('import-modo-duplicado').value;
+            const btn = document.getElementById('btn-confirm-import');
+
+            btn.disabled = true;
+            btn.textContent = 'Importando...';
+
+            try {
+                const res = await fetch(`${API_BASE}/api/tickets/importar-masivo`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        tickets: parsedExcelTickets,
+                        modo_duplicado: modo
+                    })
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message);
+                    closeImportExcelModal();
+                    await loadTickets();
+                    const dashTab = document.getElementById('section-dashboard-tab');
+                    if (dashTab && !dashTab.classList.contains('hidden')) {
+                        loadDashboardSalidas();
+                    }
+                } else {
+                    showToast(data.message || 'Error al importar tickets.', true);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error de conexión al importar tickets.', true);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    <span>Confirmar e Importar</span>
+                `;
             }
         }
 
