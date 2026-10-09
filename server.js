@@ -338,7 +338,7 @@ app.post('/api/tickets/asignar-por-numero', authMiddleware, requireRoles(1, 2), 
             `UPDATE ticket 
              SET id_usuario_asignado = ?, 
                  tipo_formato = ?,
-                 fecha_servicio = COALESCE(?::date, fecha_servicio, CURRENT_DATE),
+                 fecha_servicio = COALESCE(?::date, fecha_servicio, (CURRENT_DATE + INTERVAL '1 day')::date),
                  hora_servicio = COALESCE(?, hora_servicio, '09:00'),
                  tipo_servicio = COALESCE(?, tipo_servicio, 'incidencia'),
                  estado_ticket = 'En Proceso',
@@ -660,8 +660,9 @@ app.get('/api/dashboard/salidas', authMiddleware, async (req, res) => {
     try {
         let queryDate = req.query.fecha; // YYYY-MM-DD
         if (!queryDate || queryDate.trim() === '') {
-            const [dateRow] = await pool.query('SELECT CURRENT_DATE::text as hoy');
-            queryDate = dateRow[0].hoy;
+            // Por defecto: Reporte de técnicos que saldrán al día siguiente
+            const [dateRow] = await pool.query("SELECT (CURRENT_DATE + INTERVAL '1 day')::date::text as manana");
+            queryDate = dateRow[0].manana;
         } else {
             queryDate = queryDate.trim();
         }

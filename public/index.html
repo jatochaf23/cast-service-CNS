@@ -154,16 +154,16 @@
                         </div>
                     </div>
 
-                    <form onsubmit="handleQuickAssign(event)" class="mt-3 grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
-                        <div class="sm:col-span-3">
+                    <form onsubmit="handleQuickAssign(event)" class="mt-3 grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
+                        <div class="sm:col-span-2">
                             <label class="block text-[11px] font-bold uppercase tracking-wider text-blue-200/70 mb-1">N° Ticket</label>
-                            <input type="text" id="quick-ticket-input" required list="tickets-datalist" placeholder="Ingrese o seleccione..."
+                            <input type="text" id="quick-ticket-input" required list="tickets-datalist" placeholder="N° ticket..."
                                 class="w-full px-3 py-2 bg-[#060f1c] border border-[#1b355c] rounded-xl text-xs text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] font-mono">
                             <datalist id="tickets-datalist"></datalist>
                         </div>
 
                         <div class="sm:col-span-2">
-                            <label class="block text-[11px] font-bold uppercase tracking-wider text-blue-200/70 mb-1">Tipo de Servicio</label>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-blue-200/70 mb-1">Tipo Servicio</label>
                             <select id="quick-tipo-select"
                                 class="w-full px-3 py-2 bg-[#060f1c] border border-[#1b355c] rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
                                 <option value="incidencia">⚠️ Incidente</option>
@@ -176,9 +176,15 @@
                         </div>
 
                         <div class="sm:col-span-2">
-                            <label class="block text-[11px] font-bold uppercase tracking-wider text-blue-200/70 mb-1">Hora Salida</label>
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-blue-200/70 mb-1">Fecha Salida</label>
+                            <input type="date" id="quick-fecha-input"
+                                class="w-full px-2.5 py-2 bg-[#060f1c] border border-[#1b355c] rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] font-mono">
+                        </div>
+
+                        <div class="sm:col-span-1">
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-blue-200/70 mb-1">Hora</label>
                             <input type="time" id="quick-hora-input" value="09:00"
-                                class="w-full px-3 py-2 bg-[#060f1c] border border-[#1b355c] rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] font-mono">
+                                class="w-full px-2 py-2 bg-[#060f1c] border border-[#1b355c] rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] font-mono">
                         </div>
 
                         <div class="sm:col-span-2">
@@ -197,7 +203,7 @@
                                     class="w-full px-3 py-2 bg-[#060f1c] border border-[#1b355c] rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
                                     <option value="">-- Seleccionar --</option>
                                 </select>
-                                <button type="submit" id="btn-quick-assign" title="Asignar y Programar CAST"
+                                <button type="submit" id="btn-quick-assign" title="Asignar y Programar Salida"
                                     class="py-2 px-3 bg-[#1e3a8a] hover:bg-[#172554] active:bg-[#0b1a30] text-white font-bold text-xs rounded-xl border border-[#2d52a8] shadow-sm transition-all flex items-center justify-center shrink-0">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                     <span class="hidden lg:inline ml-1">Asignar</span>
@@ -264,10 +270,13 @@
                 <!-- Controles de Fecha y Acciones del Reporte -->
                 <div class="no-print bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div class="flex items-center gap-2 w-full sm:w-auto">
-                        <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Fecha del Reporte:</span>
+                        <span class="text-xs font-bold text-slate-600 uppercase tracking-wider">Fecha Salida:</span>
                         <input type="date" id="dash-date-picker" onchange="loadDashboardSalidas(this.value)" 
                             class="px-3 py-1.5 border border-slate-300 rounded-xl text-xs font-semibold text-slate-800 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
-                        <button onclick="setDashboardToday()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors">
+                        <button onclick="setDashboardTomorrow()" class="px-3 py-1.5 bg-[#1e3a8a] hover:bg-[#172554] text-white rounded-xl text-xs font-bold transition-colors shadow-xs flex items-center gap-1.5" title="Ver salidas programadas para el siguiente día (mañana)">
+                            <span>Siguiente Día (Mañana)</span>
+                        </button>
+                        <button onclick="setDashboardToday()" class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition-colors" title="Ver salidas de hoy">
                             Hoy
                         </button>
                     </div>
@@ -862,9 +871,23 @@
             }
         }
 
+        function getTomorrowDateStr() {
+            const d = new Date();
+            d.setDate(d.getDate() + 1);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
         function setupUIForUser() {
             document.getElementById('nav-user-name').textContent = currentUser.nombre;
             document.getElementById('nav-user-role').textContent = currentUser.correo;
+
+            const quickFecha = document.getElementById('quick-fecha-input');
+            if (quickFecha && !quickFecha.value) {
+                quickFecha.value = getTomorrowDateStr();
+            }
 
             const badge = document.getElementById('role-badge');
             if (currentUser.id_rol === 1) {
@@ -990,6 +1013,7 @@
             const idTecnico = document.getElementById('quick-tecnico-select').value;
             const tipoFormato = document.getElementById('quick-formato-select') ? document.getElementById('quick-formato-select').value : 'Multimarca';
             const tipoServicio = document.getElementById('quick-tipo-select') ? document.getElementById('quick-tipo-select').value : 'incidencia';
+            const fechaServicio = document.getElementById('quick-fecha-input') ? document.getElementById('quick-fecha-input').value : getTomorrowDateStr();
             const horaServicio = document.getElementById('quick-hora-input') ? document.getElementById('quick-hora-input').value : '09:00';
 
             if (!numTicket || !idTecnico) {
@@ -1013,6 +1037,7 @@
                         id_usuario_asignado: parseInt(idTecnico),
                         tipo_formato: tipoFormato,
                         tipo_servicio: tipoServicio,
+                        fecha_servicio: fechaServicio,
                         hora_servicio: horaServicio
                     })
                 });
@@ -1484,8 +1509,7 @@
 
                 const picker = document.getElementById('dash-date-picker');
                 if (picker && !picker.value) {
-                    const todayStr = new Date().toISOString().slice(0, 10);
-                    picker.value = todayStr;
+                    picker.value = getTomorrowDateStr();
                 }
                 loadDashboardSalidas(picker ? picker.value : null);
             } else {
@@ -1495,6 +1519,13 @@
                 tabBtnTickets.className = 'px-4 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-2 bg-[#1e3a8a] text-white shadow-sm';
                 tabBtnDash.className = 'px-4 py-2.5 text-xs sm:text-sm font-bold rounded-xl transition-all flex items-center gap-2 bg-slate-100 text-slate-700 hover:text-blue-900 hover:bg-blue-50 border border-slate-200';
             }
+        }
+
+        function setDashboardTomorrow() {
+            const tomorrowStr = getTomorrowDateStr();
+            const picker = document.getElementById('dash-date-picker');
+            if (picker) picker.value = tomorrowStr;
+            loadDashboardSalidas(tomorrowStr);
         }
 
         function setDashboardToday() {
@@ -1507,7 +1538,7 @@
         async function loadDashboardSalidas(fecha) {
             const token = localStorage.getItem('cast_token');
             const picker = document.getElementById('dash-date-picker');
-            const targetDate = fecha || (picker ? picker.value : '') || new Date().toISOString().slice(0, 10);
+            const targetDate = fecha || (picker ? picker.value : '') || getTomorrowDateStr();
 
             const tbody = document.getElementById('dash-table-body');
             if (tbody) {
@@ -1695,9 +1726,9 @@
             sel.innerHTML = '<option value="">-- Sin asignar --</option>' +
                 (allTecnicos || []).map(t => `<option value="${t.id_usuario}">${t.nombre}</option>`).join('');
             
-            const todayStr = new Date().toISOString().slice(0, 10);
+            const tomorrowStr = getTomorrowDateStr();
             const fechaInput = document.getElementById('nt-fecha-servicio');
-            if (fechaInput) fechaInput.value = todayStr;
+            if (fechaInput) fechaInput.value = tomorrowStr;
             const horaInput = document.getElementById('nt-hora-servicio');
             if (horaInput) horaInput.value = '09:00';
 
