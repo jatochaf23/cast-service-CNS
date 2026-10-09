@@ -187,12 +187,21 @@
                                 class="w-full px-2 py-2 bg-[#060f1c] border border-[#1b355c] rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] font-mono">
                         </div>
 
-                        <div class="sm:col-span-2">
+                        <div class="sm:col-span-1">
                             <label class="block text-[11px] font-bold uppercase tracking-wider text-blue-200/70 mb-1">Formato</label>
                             <select id="quick-formato-select" required
-                                class="w-full px-3 py-2 bg-[#060f1c] border border-[#1b355c] rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] font-medium">
+                                class="w-full px-2 py-2 bg-[#060f1c] border border-[#1b355c] rounded-xl text-xs text-white focus:outline-none focus:ring-2 focus:ring-[#1e3a8a] font-medium">
                                 <option value="Multimarca">Multimarca</option>
                                 <option value="Lexmark">Lexmark</option>
+                            </select>
+                        </div>
+
+                        <div class="sm:col-span-1">
+                            <label class="block text-[11px] font-bold uppercase tracking-wider text-blue-200/70 mb-1" title="Incluir en el dashboard de salidas al día siguiente">Directa</label>
+                            <select id="quick-salida-directa"
+                                class="w-full px-1.5 py-2 bg-[#060f1c] border border-[#1b355c] rounded-xl text-xs font-bold text-emerald-400 focus:outline-none focus:ring-2 focus:ring-[#1e3a8a]">
+                                <option value="true" selected>SI</option>
+                                <option value="false">NO</option>
                             </select>
                         </div>
 
@@ -241,6 +250,7 @@
                                     <th class="py-3.5 px-4">Programación</th>
                                     <th class="py-3.5 px-4">Equipo</th>
                                     <th class="py-3.5 px-4">Formato</th>
+                                    <th class="py-3.5 px-3 text-center whitespace-nowrap" title="Determina si el servicio sale en el reporte de salidas del día siguiente">Salida Directa</th>
                                     <th class="py-3.5 px-4">Técnico Asignado</th>
                                     <th class="py-3.5 px-4">Estado</th>
                                     <th class="py-3.5 px-4 text-center">Acciones</th>
@@ -248,7 +258,7 @@
                             </thead>
                             <tbody id="tickets-table-body" class="divide-y divide-slate-100">
                                 <tr>
-                                    <td colspan="8" class="text-center py-8 text-slate-400">Cargando tickets de la base de datos...</td>
+                                    <td colspan="9" class="text-center py-8 text-slate-400">Cargando tickets de la base de datos...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -596,7 +606,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-3 pt-3 border-t border-slate-100">
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 mt-3 pt-3 border-t border-slate-100">
                         <div>
                             <label class="block font-bold text-slate-600 mb-1">Tipo de Servicio <span class="text-red-500">*</span></label>
                             <select id="nt-tipo-servicio" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-slate-800">
@@ -615,6 +625,13 @@
                         <div>
                             <label class="block font-bold text-slate-600 mb-1">Hora Programada</label>
                             <input type="time" id="nt-hora-servicio" value="09:00" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-600 mb-1" title="Indica si saldrá directamente a la atención">Salida Directa</label>
+                            <select id="nt-salida-directa" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold text-emerald-700">
+                                <option value="true" selected>SI</option>
+                                <option value="false">NO</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -768,13 +785,22 @@
                     <input type="text" id="et-distrito" placeholder="Ej: San Isidro, Callao..." class="w-full px-3 py-2 border border-slate-300 rounded-lg">
                 </div>
 
-                <div>
-                    <label class="block font-bold text-slate-600 mb-1">Estado</label>
-                    <select id="et-estado" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white">
-                        <option value="Pendiente">Pendiente</option>
-                        <option value="En Proceso">En Proceso</option>
-                        <option value="Atendido">Atendido</option>
-                    </select>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1" title="Determina si saldrá en el reporte de salidas del día siguiente">Salida Directa (Dashboard)</label>
+                        <select id="et-salida-directa" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white font-bold">
+                            <option value="true">SI</option>
+                            <option value="false">NO</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">Estado</label>
+                        <select id="et-estado" class="w-full px-3 py-2 border border-slate-300 rounded-lg bg-white">
+                            <option value="Pendiente">Pendiente</option>
+                            <option value="En Proceso">En Proceso</option>
+                            <option value="Atendido">Atendido</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="flex items-center justify-end gap-2 pt-3 border-t border-slate-100">
@@ -1015,6 +1041,7 @@
             const tipoServicio = document.getElementById('quick-tipo-select') ? document.getElementById('quick-tipo-select').value : 'incidencia';
             const fechaServicio = document.getElementById('quick-fecha-input') ? document.getElementById('quick-fecha-input').value : getTomorrowDateStr();
             const horaServicio = document.getElementById('quick-hora-input') ? document.getElementById('quick-hora-input').value : '09:00';
+            const salidaDirecta = document.getElementById('quick-salida-directa') ? (document.getElementById('quick-salida-directa').value === 'true') : true;
 
             if (!numTicket || !idTecnico) {
                 showToast('Ingrese el número de ticket y seleccione el técnico.', true);
@@ -1038,7 +1065,8 @@
                         tipo_formato: tipoFormato,
                         tipo_servicio: tipoServicio,
                         fecha_servicio: fechaServicio,
-                        hora_servicio: horaServicio
+                        hora_servicio: horaServicio,
+                        salida_directa: salidaDirecta
                     })
                 });
 
@@ -1129,6 +1157,14 @@
                         </select>
                     `;
 
+                    const isDirecta = t.salida_directa !== false;
+                    const salidaDirectaSelect = `
+                        <select onchange="changeSalidaDirecta(${t.id_ticket}, this.value)" title="SI: Aparece en dashboard del día siguiente / NO: No aparece" class="text-[11px] font-black rounded-md px-2 py-1 border ${isDirecta ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-slate-300 bg-slate-100 text-slate-500'} cursor-pointer hover:opacity-90 focus:outline-none focus:ring-1 focus:ring-[#1e3a8a]">
+                            <option value="true" ${isDirecta ? 'selected' : ''}>SI</option>
+                            <option value="false" ${!isDirecta ? 'selected' : ''}>NO</option>
+                        </select>
+                    `;
+
                     let estadoBadge = '';
                     if (t.estado_ticket === 'Atendido') {
                         estadoBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider uppercase bg-emerald-50 text-emerald-800 border border-emerald-300">Atendido</span>`;
@@ -1179,6 +1215,7 @@
                                 <div class="text-[10px] text-slate-400 font-mono">S/N: ${t.serie || 'N/A'}</div>
                             </td>
                             <td class="py-3 px-4">${formatoSelect}</td>
+                            <td class="py-3 px-3 text-center">${salidaDirectaSelect}</td>
                             <td class="py-3 px-4">${tecnicoSelect}</td>
                             <td class="py-3 px-4">${estadoBadge}</td>
                             <td class="py-3 px-4 text-center">
@@ -1217,6 +1254,7 @@
                     }
 
                     const horaFmt = t.hora_servicio ? t.hora_servicio.slice(0, 5) : '09:00';
+                    const isDirecta = t.salida_directa !== false;
 
                     return `
                         <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3">
@@ -1250,16 +1288,23 @@
                                 </div>
                             </div>
 
-                            <div class="grid grid-cols-2 gap-2 pt-1 text-xs">
+                            <div class="grid grid-cols-3 gap-2 pt-1 text-xs">
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Formato CAST</label>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Formato</label>
                                     <select onchange="changeFormat(${t.id_ticket}, this.value)" class="w-full text-xs font-medium rounded-md p-1.5 border border-slate-300 bg-white text-slate-800">
                                         <option value="Multimarca" ${!isLexmark ? 'selected' : ''}>Multimarca</option>
                                         <option value="Lexmark" ${isLexmark ? 'selected' : ''}>Lexmark</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Técnico Asignado</label>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Directa</label>
+                                    <select onchange="changeSalidaDirecta(${t.id_ticket}, this.value)" class="w-full text-xs font-bold rounded-md p-1.5 border ${isDirecta ? 'border-emerald-300 bg-emerald-50 text-emerald-800' : 'border-slate-300 bg-slate-100 text-slate-500'}">
+                                        <option value="true" ${isDirecta ? 'selected' : ''}>SI</option>
+                                        <option value="false" ${!isDirecta ? 'selected' : ''}>NO</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-bold text-slate-500 uppercase mb-1">Técnico</label>
                                     <select onchange="assignTechnician(${t.id_ticket}, this.value)" class="w-full text-xs bg-white border border-slate-300 rounded-md p-1.5 font-medium text-slate-800">
                                         <option value="">-- Sin Asignar --</option>
                                         ${allTecnicos.map(tec => `
@@ -1285,6 +1330,36 @@
                         </div>
                     `;
                 }).join('');
+            }
+        }
+
+        // Cambiar Salida Directa (SI / NO) con 1 clic
+        async function changeSalidaDirecta(ticketId, value) {
+            const token = localStorage.getItem('cast_token');
+            const boolVal = (value === 'true' || value === true);
+            try {
+                const res = await fetch(`${API_BASE}/api/tickets/${ticketId}/salida-directa`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ salida_directa: boolVal })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast(data.message);
+                    await loadTickets();
+                    const dashTab = document.getElementById('section-dashboard-tab');
+                    if (dashTab && !dashTab.classList.contains('hidden')) {
+                        loadDashboardSalidas();
+                    }
+                } else {
+                    showToast(data.message || 'Error al actualizar', true);
+                }
+            } catch (err) {
+                console.error(err);
+                showToast('Error de conexión', true);
             }
         }
 
@@ -1649,6 +1724,9 @@
             document.getElementById('et-hora-servicio').value = t.hora_servicio ? t.hora_servicio.slice(0, 5) : '09:00';
             document.getElementById('et-distrito').value = t.distrito || '';
             document.getElementById('et-estado').value = t.estado_ticket || 'Pendiente';
+            if (document.getElementById('et-salida-directa')) {
+                document.getElementById('et-salida-directa').value = (t.salida_directa !== false) ? 'true' : 'false';
+            }
 
             // Poblar dropdown de técnicos
             const selTecnico = document.getElementById('et-tecnico');
@@ -1677,6 +1755,7 @@
                 tipo_formato: document.getElementById('et-formato').value,
                 fecha_servicio: document.getElementById('et-fecha-servicio').value || null,
                 hora_servicio: document.getElementById('et-hora-servicio').value || '09:00',
+                salida_directa: document.getElementById('et-salida-directa') ? (document.getElementById('et-salida-directa').value === 'true') : true,
                 id_usuario_asignado: tecnicoVal ? parseInt(tecnicoVal) : null,
                 distrito: document.getElementById('et-distrito').value.trim() || null,
                 estado_ticket: document.getElementById('et-estado').value
@@ -1760,6 +1839,7 @@
                 tipo_servicio: val('nt-tipo-servicio') || 'incidencia',
                 fecha_servicio: val('nt-fecha-servicio') || null,
                 hora_servicio: val('nt-hora-servicio') || '09:00',
+                salida_directa: document.getElementById('nt-salida-directa') ? (document.getElementById('nt-salida-directa').value === 'true') : true,
                 requerimiento: val('nt-requerimiento'),
                 incidencia: val('nt-incidencia')
             };

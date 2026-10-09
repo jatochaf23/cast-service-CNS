@@ -301,7 +301,7 @@ app.get('/api/tickets/:id', authMiddleware, async (req, res) => {
 // Asignar ticket directamente por NÚMERO DE TICKET y TÉCNICO (Administrador y Dispatcher)
 app.post('/api/tickets/asignar-por-numero', authMiddleware, requireRoles(1, 2), async (req, res) => {
     try {
-        const { numero_ticket, id_usuario_asignado, tipo_formato, fecha_servicio, hora_servicio, tipo_servicio } = req.body;
+        const { numero_ticket, id_usuario_asignado, tipo_formato, fecha_servicio, hora_servicio, tipo_servicio, salida_directa } = req.body;
         if (!numero_ticket || !id_usuario_asignado) {
             return res.status(400).json({ success: false, message: 'Ingrese el número de ticket y seleccione un técnico.' });
         }
@@ -332,6 +332,9 @@ app.post('/api/tickets/asignar-por-numero', authMiddleware, requireRoles(1, 2), 
 
         const ticket = rows[0];
         const formatoFinal = tipo_formato || ticket.tipo_formato || 'Multimarca';
+        const isSalidaDirecta = salida_directa !== undefined 
+            ? (salida_directa === true || salida_directa === 'SI' || salida_directa === 'true' || salida_directa === 1) 
+            : (ticket.salida_directa !== null ? ticket.salida_directa : true);
 
         // Asignar ticket y actualizar programación
         await pool.query(
@@ -341,10 +344,11 @@ app.post('/api/tickets/asignar-por-numero', authMiddleware, requireRoles(1, 2), 
                  fecha_servicio = COALESCE(?::date, fecha_servicio, (CURRENT_DATE + INTERVAL '1 day')::date),
                  hora_servicio = COALESCE(?, hora_servicio, '09:00'),
                  tipo_servicio = COALESCE(?, tipo_servicio, 'incidencia'),
+                 salida_directa = ?,
                  estado_ticket = 'En Proceso',
                  actualizado_en = CURRENT_TIMESTAMP
              WHERE id_ticket = ?`,
-            [id_usuario_asignado, formatoFinal, fecha_servicio || null, hora_servicio || null, tipo_servicio || null, ticket.id_ticket]
+            [id_usuario_asignado, formatoFinal, fecha_servicio || null, hora_servicio || null, tipo_servicio || null, isSalidaDirecta, ticket.id_ticket]
         );
 
         // Devolver ticket con todas sus columnas leídas de la BD
@@ -518,6 +522,32 @@ app.put('/api/tickets/:id', authMiddleware, requireRoles(1, 2), async (req, res)
     }
 });
 
+// Cambiar 'Salida Directa' (SI / NO) con 1 clic (Administrador y Dispatcher)
+app.put('/api/tickets/:id/salida-directa', authMiddleware, requireRoles(1, 2), async (req, res) => {
+    try {
+        const ticketId = req.params.id;
+        const { salida_directa } = req.body;
+        const isSalidaDirecta = salida_directa === true || salida_directa === 'SI' || salida_directa === 'true' || salida_directa === 1;
+
+        await pool.query(
+            `UPDATE ticket 
+             SET salida_directa = ?,
+                 actualizado_en = CURRENT_TIMESTAMP
+             WHERE id_ticket = ?`,
+            [isSalidaDirecta, ticketId]
+        );
+
+        res.json({
+            success: true,
+            message: `Salida directa actualizada a ${isSalidaDirecta ? 'SÍ' : 'NO'}.`,
+            salida_directa: isSalidaDirecta
+        });
+    } catch (err) {
+        console.error('Error al actualizar salida directa:', err);
+        res.status(500).json({ success: false, message: 'Error interno al actualizar salida directa.' });
+    }
+});
+
 // Asignar, reasignar o desasignar ticket (Administrador y Dispatcher)
 app.put('/api/tickets/:id/asignar', authMiddleware, requireRoles(1, 2), async (req, res) => {
     try {
@@ -674,7 +704,7 @@ app.get('/api/dashboard/salidas', authMiddleware, async (req, res) => {
                     u.nombre as nombre_tecnico, u.telefono as telefono_tecnico
              FROM ticket t
              LEFT JOIN usuarios u ON t.id_usuario_asignado = u.id_usuario
-             WHERE t.fecha_servicio = ?::date
+             WHERE t.fecha_servicio = ?::date AND t.salida_directa = true
              ORDER BY t.hora_servicio ASC, t.id_ticket ASC`,
             [queryDate]
         );
