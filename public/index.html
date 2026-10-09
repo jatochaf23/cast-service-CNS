@@ -1973,6 +1973,15 @@
                     </option>
                 `).join('');
 
+            selTecnico.onchange = function() {
+                const estadoSelect = document.getElementById('et-estado');
+                if (!this.value && estadoSelect.value === 'En Proceso') {
+                    estadoSelect.value = 'Pendiente';
+                } else if (this.value && estadoSelect.value === 'Pendiente') {
+                    estadoSelect.value = 'En Proceso';
+                }
+            };
+
             document.getElementById('edit-ticket-modal').classList.remove('hidden');
         }
 
@@ -1986,6 +1995,13 @@
             const ticketId = document.getElementById('et-id-ticket').value;
             const tecnicoVal = document.getElementById('et-tecnico').value;
 
+            let estadoVal = document.getElementById('et-estado').value;
+            if (!tecnicoVal && estadoVal === 'En Proceso') {
+                estadoVal = 'Pendiente';
+            } else if (tecnicoVal && estadoVal === 'Pendiente') {
+                estadoVal = 'En Proceso';
+            }
+
             const payload = {
                 tipo_servicio: document.getElementById('et-tipo-servicio').value,
                 tipo_formato: document.getElementById('et-formato').value,
@@ -1994,7 +2010,7 @@
                 salida_directa: document.getElementById('et-salida-directa') ? (document.getElementById('et-salida-directa').value === 'true') : true,
                 id_usuario_asignado: tecnicoVal ? parseInt(tecnicoVal) : null,
                 distrito: document.getElementById('et-distrito').value.trim() || null,
-                estado_ticket: document.getElementById('et-estado').value
+                estado_ticket: estadoVal
             };
 
             const btn = document.getElementById('et-btn-submit');

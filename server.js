@@ -659,7 +659,11 @@ app.post('/api/tickets/importar-masivo', authMiddleware, requireRoles(1, 2), asy
 // Actualizar ticket (Administrador y Dispatcher)
 app.put('/api/tickets/:id', authMiddleware, requireRoles(1, 2), async (req, res) => {
     try {
-        const ticketId = req.params.id;
+        const ticketId = parseInt(req.params.id);
+        if (isNaN(ticketId)) {
+            return res.status(400).json({ success: false, message: 'ID de ticket inválido.' });
+        }
+
         const {
             cliente,
             usuario,
@@ -678,48 +682,83 @@ app.put('/api/tickets/:id', authMiddleware, requireRoles(1, 2), async (req, res)
             estado_ticket
         } = req.body;
 
-        await pool.query(
-            `UPDATE ticket 
-             SET cliente = COALESCE(?, cliente),
-                 usuario = COALESCE(?, usuario),
-                 direccion = COALESCE(?, direccion),
-                 telefono = COALESCE(?, telefono),
-                 distrito = COALESCE(?, distrito),
-                 marca = COALESCE(?, marca),
-                 modelo = COALESCE(?, modelo),
-                 serie = COALESCE(?, serie),
-                 tipo_formato = COALESCE(?, tipo_formato),
-                 id_usuario_asignado = CASE WHEN ? IS NOT NULL THEN ? ELSE id_usuario_asignado END,
-                 fecha_servicio = CASE WHEN ? IS NOT NULL THEN ?::date ELSE fecha_servicio END,
-                 hora_servicio = COALESCE(?, hora_servicio),
-                 tipo_servicio = COALESCE(?, tipo_servicio),
-                 salida_directa = CASE WHEN ? IS NOT NULL THEN ? ELSE salida_directa END,
-                 estado_ticket = COALESCE(?, estado_ticket),
-                 actualizado_en = CURRENT_TIMESTAMP
-             WHERE id_ticket = ?`,
-            [
-                cliente || null,
-                usuario || null,
-                direccion || null,
-                telefono || null,
-                distrito || null,
-                marca || null,
-                modelo || null,
-                serie || null,
-                tipo_formato || null,
-                id_usuario_asignado !== undefined ? (id_usuario_asignado ? parseInt(id_usuario_asignado) : null) : null,
-                id_usuario_asignado !== undefined ? (id_usuario_asignado ? parseInt(id_usuario_asignado) : null) : null,
-                fecha_servicio || null,
-                fecha_servicio || null,
-                hora_servicio || null,
-                tipo_servicio || null,
-                salida_directa !== undefined ? salida_directa : null,
-                salida_directa !== undefined ? salida_directa : null,
-                estado_ticket || null,
-                ticketId
-            ]
-        );
+        const updates = [];
+        const params = [];
 
+        if (cliente !== undefined) {
+            updates.push(`cliente = ?`);
+            params.push(cliente ? cliente.trim() : null);
+        }
+        if (usuario !== undefined) {
+            updates.push(`usuario = ?`);
+            params.push(usuario ? usuario.trim() : null);
+        }
+        if (direccion !== undefined) {
+            updates.push(`direccion = ?`);
+            params.push(direccion ? direccion.trim() : null);
+        }
+        if (telefono !== undefined) {
+            updates.push(`telefono = ?`);
+            params.push(telefono ? telefono.trim() : null);
+        }
+        if (distrito !== undefined) {
+            updates.push(`distrito = ?`);
+            params.push(distrito ? distrito.trim() : null);
+        }
+        if (marca !== undefined) {
+            updates.push(`marca = ?`);
+            params.push(marca ? marca.trim() : null);
+        }
+        if (modelo !== undefined) {
+            updates.push(`modelo = ?`);
+            params.push(modelo ? modelo.trim() : null);
+        }
+        if (serie !== undefined) {
+            updates.push(`serie = ?`);
+            params.push(serie ? serie.trim() : null);
+        }
+        if (tipo_formato !== undefined) {
+            updates.push(`tipo_formato = ?`);
+            params.push(tipo_formato ? tipo_formato.trim() : 'Multimarca');
+        }
+        if (tipo_servicio !== undefined) {
+            updates.push(`tipo_servicio = ?`);
+            params.push(tipo_servicio ? tipo_servicio.trim() : 'incidencia');
+        }
+        if (fecha_servicio !== undefined) {
+            updates.push(`fecha_servicio = ?::date`);
+            params.push(fecha_servicio ? fecha_servicio.trim() : null);
+        }
+        if (hora_servicio !== undefined) {
+            updates.push(`hora_servicio = ?`);
+            params.push(hora_servicio ? hora_servicio.trim().slice(0, 5) : '09:00');
+        }
+        if (salida_directa !== undefined) {
+            const isDirecta = salida_directa === true || salida_directa === 'true' || salida_directa === 'SI' || salida_directa === 1;
+            updates.push(`salida_directa = ?`);
+            params.push(isDirecta);
+        }
+        if (id_usuario_asignado !== undefined) {
+            const tecId = id_usuario_asignado ? parseInt(id_usuario_asignado) : null;
+            updates.push(`id_usuario_asignado = ?`);
+            params.push(tecId);
+        }
+        if (estado_ticket !== undefined) {
+            updates.push(`estado_ticket = ?`);
+            params.push(estado_ticket ? estado_ticket.trim() : 'Pendiente');
+        }
+
+        if (updates.length === 0) {
+            return res.json({ success: true, message: 'No hubo cambios para actualizar.' });
+        }
+
+        updates.push(`actualizado_en = CURRENT_TIMESTAMP`);
+        params.push(ticketId);
+
+        const sql = `UPDATE ticket SET ${updates.join(', ')} WHERE id_ticket = ?`;
+        await pool.query(sql, params);
+
+        console.log(`✅ Ticket #${ticketId} actualizado correctamente.`);
         res.json({ success: true, message: 'Ticket actualizado correctamente.' });
     } catch (err) {
         console.error('Error al actualizar ticket:', err);
@@ -730,7 +769,7 @@ app.put('/api/tickets/:id', authMiddleware, requireRoles(1, 2), async (req, res)
 // Cambiar 'Salida Directa' (SI / NO) con 1 clic (Administrador y Dispatcher)
 app.put('/api/tickets/:id/salida-directa', authMiddleware, requireRoles(1, 2), async (req, res) => {
     try {
-        const ticketId = req.params.id;
+        const ticketId = parseInt(req.params.id);
         const { salida_directa } = req.body;
         const isSalidaDirecta = salida_directa === true || salida_directa === 'SI' || salida_directa === 'true' || salida_directa === 1;
 
@@ -756,7 +795,7 @@ app.put('/api/tickets/:id/salida-directa', authMiddleware, requireRoles(1, 2), a
 // Asignar, reasignar o desasignar ticket (Administrador y Dispatcher)
 app.put('/api/tickets/:id/asignar', authMiddleware, requireRoles(1, 2), async (req, res) => {
     try {
-        const ticketId = req.params.id;
+        const ticketId = parseInt(req.params.id);
         const { id_usuario_asignado, tipo_formato } = req.body;
 
         // Si se envía vacío o null, se retira de la bandeja del técnico (vuelve a Pendiente)
@@ -766,7 +805,8 @@ app.put('/api/tickets/:id/asignar', authMiddleware, requireRoles(1, 2), async (r
                     `UPDATE ticket 
                      SET id_usuario_asignado = NULL, 
                          tipo_formato = ?,
-                         estado_ticket = 'Pendiente'
+                         estado_ticket = 'Pendiente',
+                         actualizado_en = CURRENT_TIMESTAMP
                      WHERE id_ticket = ?`,
                     [tipo_formato, ticketId]
                 );
@@ -774,7 +814,8 @@ app.put('/api/tickets/:id/asignar', authMiddleware, requireRoles(1, 2), async (r
                 await pool.query(
                     `UPDATE ticket 
                      SET id_usuario_asignado = NULL, 
-                         estado_ticket = 'Pendiente'
+                         estado_ticket = 'Pendiente',
+                         actualizado_en = CURRENT_TIMESTAMP
                      WHERE id_ticket = ?`,
                     [ticketId]
                 );
@@ -787,10 +828,15 @@ app.put('/api/tickets/:id/asignar', authMiddleware, requireRoles(1, 2), async (r
             });
         }
 
+        const tecId = parseInt(id_usuario_asignado);
+        if (isNaN(tecId)) {
+            return res.status(400).json({ success: false, message: 'ID de técnico inválido.' });
+        }
+
         // Verificar que el usuario asignado sea técnico activo
         const [tecnico] = await pool.query(
             `SELECT id_usuario, nombre FROM usuarios WHERE id_usuario = ? AND id_rol = 3 AND estado = 'Activo'`,
-            [id_usuario_asignado]
+            [tecId]
         );
         if (tecnico.length === 0) {
             return res.status(400).json({ success: false, message: 'El técnico seleccionado no existe o no está activo.' });
@@ -802,17 +848,19 @@ app.put('/api/tickets/:id/asignar', authMiddleware, requireRoles(1, 2), async (r
                 `UPDATE ticket 
                  SET id_usuario_asignado = ?, 
                      tipo_formato = ?,
-                     estado_ticket = 'En Proceso'
+                     estado_ticket = 'En Proceso',
+                     actualizado_en = CURRENT_TIMESTAMP
                  WHERE id_ticket = ?`,
-                [id_usuario_asignado, tipo_formato, ticketId]
+                [tecId, tipo_formato, ticketId]
             );
         } else {
             await pool.query(
                 `UPDATE ticket 
                  SET id_usuario_asignado = ?, 
-                     estado_ticket = 'En Proceso'
+                     estado_ticket = 'En Proceso',
+                     actualizado_en = CURRENT_TIMESTAMP
                  WHERE id_ticket = ?`,
-                [id_usuario_asignado, ticketId]
+                [tecId, ticketId]
             );
         }
 
