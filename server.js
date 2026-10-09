@@ -1017,7 +1017,7 @@ app.get('/api/dashboard/salidas', authMiddleware, async (req, res) => {
                     u.nombre as nombre_tecnico, u.telefono as telefono_tecnico
              FROM ticket t
              LEFT JOIN usuarios u ON t.id_usuario_asignado = u.id_usuario
-             WHERE t.fecha_servicio = ?::date AND t.salida_directa = true
+             WHERE t.fecha_servicio = ?::date AND (t.salida_directa IS NULL OR t.salida_directa = true)
              ORDER BY t.hora_servicio ASC, t.id_ticket ASC`,
             [queryDate]
         );
