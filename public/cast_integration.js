@@ -121,6 +121,24 @@
             padding: 4px 8px;
             border-radius: 6px;
         }
+        /* Estilos para campos bloqueados que se rellenan en automático */
+        .field-auto-locked {
+            background-color: #f1f5f9 !important;
+            color: #334155 !important;
+            cursor: not-allowed !important;
+            border-color: #cbd5e1 !important;
+            user-select: none;
+        }
+        .field-auto-locked:focus {
+            outline: none !important;
+            box-shadow: none !important;
+            border-color: #cbd5e1 !important;
+        }
+        .checkbox-auto-locked {
+            pointer-events: none !important;
+            opacity: 0.85;
+            cursor: not-allowed !important;
+        }
         @media screen and (max-width: 640px) {
             .cast-db-bar {
                 flex-direction: column;
@@ -145,6 +163,10 @@
         @media print {
             .cast-db-bar, .db-sync-notice, .db-draft-notice {
                 display: none !important;
+            }
+            .field-auto-locked {
+                background-color: #ffffff !important;
+                color: #000000 !important;
             }
         }
     `;
@@ -296,81 +318,99 @@
     }
 
     function populateFields(ticket) {
-        // 1. Cliente
-        setInputValue('cliente', ticket.cliente);
+        // 1. Cliente (Bloqueado)
+        setInputValue('cliente', ticket.cliente, true);
 
-        // 2. ID_ticket / Número de ticket
-        setInputValue('ticket-number', ticket.numero_ticket);
+        // 2. ID_ticket / Número de ticket (Bloqueado)
+        setInputValue('ticket-number', ticket.numero_ticket, true);
 
-        // 3. Usuario (contacto general en cabecera)
-        setInputValue('usuario', ticket.usuario);
+        // 3. Usuario (contacto general en cabecera) (Bloqueado si vino en el ticket)
+        if (ticket.usuario) {
+            setInputValue('usuario', ticket.usuario, true);
+        }
 
-        // 4. Dirección
-        setInputValue('direccion', ticket.direccion);
+        // 4. Dirección (Bloqueado si vino en el ticket)
+        if (ticket.direccion) {
+            setInputValue('direccion', ticket.direccion, true);
+        }
 
-        // 5. Teléfono
-        setInputValue('telefono', ticket.telefono);
-        if (ticket.telefono && document.getElementById('celular')) {
-            if (ticket.telefono.trim().startsWith('9')) {
-                setInputValue('celular', ticket.telefono);
+        // 5. Teléfono y celular (Bloqueado si vino en el ticket)
+        if (ticket.telefono) {
+            setInputValue('telefono', ticket.telefono, true);
+            if (document.getElementById('celular') && ticket.telefono.trim().startsWith('9')) {
+                setInputValue('celular', ticket.telefono, true);
             }
         }
 
-        // 6. Distrito
-        setInputValue('distrito', ticket.distrito);
+        // 6. Distrito (Bloqueado si vino en el ticket)
+        if (ticket.distrito) {
+            setInputValue('distrito', ticket.distrito, true);
+        }
 
-        // 7. Marca
-        setInputValue('marca', ticket.marca);
+        // 7. Marca (Bloqueado si vino en el ticket)
+        if (ticket.marca) {
+            setInputValue('marca', ticket.marca, true);
+        }
 
-        // 8. Modelo
-        setInputValue('modelo', ticket.modelo);
+        // 8. Modelo (Bloqueado si vino en el ticket)
+        if (ticket.modelo) {
+            setInputValue('modelo', ticket.modelo, true);
+        }
 
-        // 9. Serie
-        setInputValue('serie', ticket.serie);
+        // 9. Serie (Bloqueado si vino en el ticket)
+        if (ticket.serie) {
+            setInputValue('serie', ticket.serie, true);
+        }
 
-        // Marcar tipo de equipo si coincide
+        // Marcar y bloquear tipo de equipo si coincide
         if (ticket.marca || ticket.modelo) {
             const lowerMarca = (ticket.marca || '').toLowerCase();
             const lowerModelo = (ticket.modelo || '').toLowerCase();
             if (lowerMarca.includes('lexmark') || lowerModelo.includes('impresora') || lowerModelo.includes('ms') || lowerModelo.includes('mx')) {
-                setCheckbox('equipo', 'impresora', true);
+                setCheckbox('equipo', 'impresora', true, true);
             }
         }
 
-        // 10. Tipo de servicio automático (Incidencia, Requerimiento, Mantenimiento, etc.)
+        // 10. Tipo de servicio automático (Incidencia, Requerimiento, Mantenimiento, etc. Bloqueado)
         if (ticket.tipo_servicio) {
             const tipoLower = ticket.tipo_servicio.toLowerCase();
             if (tipoLower.includes('inciden') || tipoLower.includes('fall')) {
-                setCheckbox('tipo_servicio', 'incidencia', true);
+                setCheckbox('tipo_servicio', 'incidencia', true, true);
             }
             if (tipoLower.includes('requerim')) {
-                setCheckbox('tipo_servicio', 'requerimiento', true);
+                setCheckbox('tipo_servicio', 'requerimiento', true, true);
             }
             if (tipoLower.includes('mantenim')) {
-                setCheckbox('tipo_servicio', 'mantenimiento', true);
+                setCheckbox('tipo_servicio', 'mantenimiento', true, true);
             }
             if (tipoLower.includes('contrat')) {
-                setCheckbox('tipo_servicio', 'contrato', true);
+                setCheckbox('tipo_servicio', 'contrato', true, true);
             }
             if (tipoLower.includes('garant')) {
-                setCheckbox('tipo_servicio', 'garantia', true);
+                setCheckbox('tipo_servicio', 'garantia', true, true);
             }
             if (tipoLower.includes('otro')) {
-                setCheckbox('tipo_servicio', 'otros', true);
+                setCheckbox('tipo_servicio', 'otros', true, true);
             }
         } else {
             // Compatibilidad si solo se llenó texto de requerimiento o incidencia
             if (ticket.requerimiento) {
-                setCheckbox('tipo_servicio', 'requerimiento', true);
+                setCheckbox('tipo_servicio', 'requerimiento', true, true);
             }
             if (ticket.incidencia) {
-                setCheckbox('tipo_servicio', 'incidencia', true);
+                setCheckbox('tipo_servicio', 'incidencia', true, true);
             }
         }
 
-        // Fecha de servicio programada
+        // Falla o requerimiento inicial reportado por usuario (si vino en ticket, bloqueado)
+        const fallaReportada = ticket.incidencia || ticket.requerimiento;
+        if (fallaReportada && document.getElementById('falla-usuario')) {
+            setInputValue('falla-usuario', fallaReportada, true);
+        }
+
+        // Fecha de servicio programada (Bloqueado si vino programado)
         if (ticket.fecha_servicio) {
-            setInputValue('fecha', ticket.fecha_servicio);
+            setInputValue('fecha', ticket.fecha_servicio, true);
         }
 
         // Hora de servicio programada
@@ -379,14 +419,14 @@
             setInputValue('h_i_s', ticket.hora_servicio);
         }
 
-        // Nombre de técnico responsable
+        // Nombre de técnico responsable (Bloqueado si ya está asignado o es el técnico logueado)
         if (ticket.nombre_tecnico) {
-            setInputValue('rep-tecnico-nombre', ticket.nombre_tecnico);
+            setInputValue('rep-tecnico-nombre', ticket.nombre_tecnico, true);
         } else if (currentUser && currentUser.id_rol === 3) {
-            setInputValue('rep-tecnico-nombre', currentUser.nombre);
+            setInputValue('rep-tecnico-nombre', currentUser.nombre, true);
         }
 
-        // Si ya tenía datos guardados previamente en BD
+        // Si ya tenía datos guardados previamente en BD (falla real, actividad, correlativo)
         if (ticket.falla_real) {
             setInputValue('falla-real', ticket.falla_real);
         }
@@ -402,18 +442,35 @@
         }
     }
 
-    function setInputValue(id, val) {
+    function setInputValue(id, val, lock = false) {
         if (!val) return;
         const el = document.getElementById(id);
         if (el) {
             el.value = val;
+            if (lock) {
+                el.readOnly = true;
+                el.classList.add('field-auto-locked');
+                el.setAttribute('tabindex', '-1');
+                el.title = 'Campo rellenado automáticamente desde el ticket asignado (bloqueado para edición)';
+            }
         }
     }
 
-    function setCheckbox(name, value, isChecked) {
+    function setCheckbox(name, value, isChecked, lock = false) {
         const cb = document.querySelector(`input[name="${name}"][value="${value}"]`);
         if (cb) {
             cb.checked = isChecked;
+            if (lock) {
+                cb.classList.add('checkbox-auto-locked');
+                cb.setAttribute('tabindex', '-1');
+                cb.title = 'Seleccionado automáticamente desde el ticket asignado (bloqueado)';
+                // Deshabilitar otros checkboxes del mismo grupo para no cambiarlo
+                const group = document.querySelectorAll(`input[name="${name}"]`);
+                group.forEach(item => {
+                    item.classList.add('checkbox-auto-locked');
+                    item.addEventListener('click', (e) => e.preventDefault());
+                });
+            }
         }
     }
 
