@@ -311,111 +311,111 @@
                     </div>
                 </div>
 
-                <!-- CONTENEDOR DEL DASHBOARD (DISEÑO IDÉNTICO A LA IMAGEN) -->
-                <div id="printable-dashboard" class="bg-white rounded-3xl border border-slate-200 p-6 sm:p-8 shadow-sm space-y-6">
+                <!-- CONTENEDOR DEL DASHBOARD (DISEÑO OPTIMIZADO Y CENTRADO) -->
+                <div id="printable-dashboard" class="bg-white rounded-3xl border border-slate-200 p-5 sm:p-6 shadow-sm space-y-4">
                     
                     <!-- CABECERA DEL REPORTE -->
-                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pb-5 border-b-2 border-slate-100">
+                    <div class="flex flex-col md:flex-row items-center justify-between gap-4 pb-4 border-b-2 border-slate-100">
                         <!-- Logo CNS -->
-                        <div class="flex items-center gap-3">
-                            <img src="cns_logo.svg" alt="CNS Logo" class="h-16 w-auto max-w-[210px] object-contain">
+                        <div class="flex items-center justify-center md:justify-start shrink-0">
+                            <img src="cns_logo.svg" alt="CNS Logo" class="h-16 sm:h-20 w-auto max-w-[240px] object-contain drop-shadow-xs">
                         </div>
 
                         <!-- Título Central -->
-                        <div class="text-center sm:text-left flex-1 sm:pl-8 sm:border-l sm:border-slate-300">
-                            <h2 class="text-2xl sm:text-3xl font-black text-[#0f2942] tracking-tight uppercase leading-none">
+                        <div class="text-center flex-1 px-2 md:px-6">
+                            <h2 class="text-3xl sm:text-4xl font-black text-[#0f2942] tracking-tight uppercase leading-none">
                                 SALIDAS A SERVICIO
                             </h2>
-                            <div class="text-lg sm:text-xl font-black text-[#0284c7] tracking-tight uppercase mt-1">
+                            <div class="text-xl sm:text-2xl font-black text-[#0284c7] tracking-tight uppercase mt-1">
                                 <span id="dash-dia-display">VIERNES</span> - DIRECTO A SERVICIO
                             </div>
                         </div>
 
                         <!-- Caja de Fecha -->
-                        <div class="bg-sky-50/70 border border-sky-200 rounded-2xl p-3 flex items-center gap-3 min-w-[210px]">
-                            <div class="text-sky-600">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="bg-gradient-to-br from-sky-50 to-blue-50/80 border border-sky-200 rounded-2xl px-4 py-2.5 flex items-center gap-3 shrink-0 shadow-xs">
+                            <div class="text-sky-600 shrink-0">
+                                <svg class="w-9 h-9" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                 </svg>
                             </div>
-                            <div>
-                                <div class="text-[10px] font-bold uppercase tracking-wider text-slate-500">Fecha de Servicio</div>
-                                <div id="dash-fecha-display" class="text-lg font-black text-[#0f2942] leading-tight">--/--/----</div>
-                                <div id="dash-dia-capital" class="text-xs font-semibold text-slate-600">(...)</div>
+                            <div class="text-left">
+                                <div class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Fecha de Servicio</div>
+                                <div id="dash-fecha-display" class="text-xl font-black text-[#0f2942] leading-tight font-mono">--/--/----</div>
+                                <div id="dash-dia-capital" class="text-xs font-bold text-sky-700 capitalize mt-0.5">(...)</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- TARJETAS DE RESUMEN (KPIs) -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                         
                         <!-- Card 1: Técnicos -->
-                        <div class="bg-[#f0f9ff]/70 border border-sky-100 rounded-2xl p-5 flex items-center gap-4">
-                            <div class="text-[#0f2942]">
-                                <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+                        <div class="bg-gradient-to-br from-[#f0f9ff] to-[#e0f2fe]/60 border border-sky-200/80 rounded-2xl p-3.5 flex items-center gap-3.5 shadow-xs">
+                            <div class="text-[#0f2942] p-2 bg-white/80 rounded-xl shadow-xs shrink-0">
+                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
                                 </svg>
                             </div>
                             <div>
-                                <div id="dash-count-tecnicos" class="text-4xl font-black text-[#0f2942] leading-none">0</div>
-                                <div class="text-sm font-black text-[#0f2942] uppercase tracking-tight mt-1">TÉCNICOS</div>
-                                <div class="text-[11px] font-bold text-sky-600 uppercase">EN SALIDA DIRECTA</div>
+                                <div id="dash-count-tecnicos" class="text-3xl font-black text-[#0f2942] leading-none">0</div>
+                                <div class="text-xs font-black text-[#0f2942] uppercase tracking-tight mt-1">TÉCNICOS</div>
+                                <div class="text-[10px] font-bold text-sky-600 uppercase">EN SALIDA DIRECTA</div>
                             </div>
                         </div>
 
                         <!-- Card 2: Clientes -->
-                        <div class="bg-[#f0f9ff]/70 border border-sky-100 rounded-2xl p-5 flex items-center gap-4">
-                            <div class="text-[#0f2942]">
-                                <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+                        <div class="bg-gradient-to-br from-[#f0f9ff] to-[#e0f2fe]/60 border border-sky-200/80 rounded-2xl p-3.5 flex items-center gap-3.5 shadow-xs">
+                            <div class="text-[#0f2942] p-2 bg-white/80 rounded-xl shadow-xs shrink-0">
+                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clip-rule="evenodd"></path>
                                 </svg>
                             </div>
                             <div>
-                                <div id="dash-count-clientes" class="text-4xl font-black text-[#0f2942] leading-none">0</div>
-                                <div class="text-sm font-black text-[#0f2942] uppercase tracking-tight mt-1">CLIENTES</div>
-                                <div class="text-[11px] font-bold text-sky-600 uppercase">A ATENDER</div>
+                                <div id="dash-count-clientes" class="text-3xl font-black text-[#0f2942] leading-none">0</div>
+                                <div class="text-xs font-black text-[#0f2942] uppercase tracking-tight mt-1">CLIENTES</div>
+                                <div class="text-[10px] font-bold text-sky-600 uppercase">A ATENDER</div>
                             </div>
                         </div>
 
                         <!-- Card 3: Distritos -->
-                        <div class="bg-[#f0f9ff]/70 border border-sky-100 rounded-2xl p-5 flex items-center gap-4">
-                            <div class="text-[#0f2942]">
-                                <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
+                        <div class="bg-gradient-to-br from-[#f0f9ff] to-[#e0f2fe]/60 border border-sky-200/80 rounded-2xl p-3.5 flex items-center gap-3.5 shadow-xs">
+                            <div class="text-[#0f2942] p-2 bg-white/80 rounded-xl shadow-xs shrink-0">
+                                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
                                 </svg>
                             </div>
                             <div>
-                                <div id="dash-count-distritos" class="text-4xl font-black text-[#0f2942] leading-none">0</div>
-                                <div class="text-sm font-black text-[#0f2942] uppercase tracking-tight mt-1">DISTRITOS</div>
-                                <div class="text-[11px] font-bold text-sky-600 uppercase">DE DESTINO</div>
+                                <div id="dash-count-distritos" class="text-3xl font-black text-[#0f2942] leading-none">0</div>
+                                <div class="text-xs font-black text-[#0f2942] uppercase tracking-tight mt-1">DISTRITOS</div>
+                                <div class="text-[10px] font-bold text-sky-600 uppercase">DE DESTINO</div>
                             </div>
                         </div>
 
                         <!-- Card 4: Breakdown de Tipos -->
-                        <div class="bg-white border border-slate-200 rounded-2xl p-3 flex flex-col justify-center space-y-2 shadow-xs">
+                        <div class="bg-white border border-slate-200 rounded-2xl p-2.5 flex flex-col justify-center space-y-1.5 shadow-xs">
                             <!-- Incidente -->
-                            <div class="flex items-center justify-between px-3 py-1 bg-red-50/70 rounded-xl border border-red-100">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-red-600 font-bold">⚠️</span>
-                                    <span id="dash-count-incidentes" class="text-base font-black text-slate-900">0</span>
+                            <div class="flex items-center justify-between px-2.5 py-1 bg-red-50/70 rounded-lg border border-red-100">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-red-600 text-xs font-bold">⚠️</span>
+                                    <span id="dash-count-incidentes" class="text-sm font-black text-slate-900 leading-none">0</span>
                                 </div>
-                                <span class="text-[11px] font-extrabold text-red-600 uppercase tracking-wide">INCIDENTE</span>
+                                <span class="text-[10px] font-extrabold text-red-600 uppercase tracking-wide">INCIDENTE</span>
                             </div>
                             <!-- Mantenimiento -->
-                            <div class="flex items-center justify-between px-3 py-1 bg-emerald-50/70 rounded-xl border border-emerald-100">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-emerald-600 font-bold">🔧</span>
-                                    <span id="dash-count-mantenimientos" class="text-base font-black text-slate-900">0</span>
+                            <div class="flex items-center justify-between px-2.5 py-1 bg-emerald-50/70 rounded-lg border border-emerald-100">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-emerald-600 text-xs font-bold">🔧</span>
+                                    <span id="dash-count-mantenimientos" class="text-sm font-black text-slate-900 leading-none">0</span>
                                 </div>
-                                <span class="text-[11px] font-extrabold text-emerald-600 uppercase tracking-wide">MANTENIMIENTOS</span>
+                                <span class="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wide">MANTENIMIENTOS</span>
                             </div>
                             <!-- Requerimiento -->
-                            <div class="flex items-center justify-between px-3 py-1 bg-sky-50/70 rounded-xl border border-sky-100">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-sky-600 font-bold">📄</span>
-                                    <span id="dash-count-requerimientos" class="text-base font-black text-slate-900">0</span>
+                            <div class="flex items-center justify-between px-2.5 py-1 bg-sky-50/70 rounded-lg border border-sky-100">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="text-sky-600 text-xs font-bold">📄</span>
+                                    <span id="dash-count-requerimientos" class="text-sm font-black text-slate-900 leading-none">0</span>
                                 </div>
-                                <span class="text-[11px] font-extrabold text-sky-600 uppercase tracking-wide">REQUERIMIENTOS</span>
+                                <span class="text-[10px] font-extrabold text-sky-600 uppercase tracking-wide">REQUERIMIENTOS</span>
                             </div>
                         </div>
                     </div>
