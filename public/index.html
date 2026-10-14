@@ -517,13 +517,13 @@
 
     </main>
 
-    <!-- MODAL: GESTIÓN DE USUARIOS (SOLO ADMINISTRADOR) -->
+    <!-- MODAL: GESTIÓN DE USUARIOS (ADMINISTRADOR Y DISPATCHER) -->
     <div id="users-modal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 max-h-[90vh] flex flex-col">
             <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
                 <div>
                     <h3 class="text-lg font-bold text-slate-900">Usuarios y Técnicos de la Base de Datos</h3>
-                    <p class="text-xs text-slate-500">Gestión de personal registrado en cast_db.</p>
+                    <p class="text-xs text-slate-500">Gestión y registro de personal en cast_db.</p>
                 </div>
                 <button onclick="closeUsersModal()" class="text-slate-400 hover:text-slate-600 p-1">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -1060,6 +1060,7 @@
             } else if (currentUser.id_rol === 2) {
                 badge.className = 'px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wider uppercase bg-blue-50 text-[#1e3a8a] border border-blue-200';
                 badge.textContent = 'DISPATCHER';
+                document.getElementById('btn-manage-users').classList.remove('hidden');
                 document.getElementById('admin-dispatcher-view').classList.remove('hidden');
                 loadTecnicos();
                 loadTickets();

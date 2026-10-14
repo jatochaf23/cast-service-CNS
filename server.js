@@ -177,8 +177,8 @@ app.get('/api/tecnicos', authMiddleware, requireRoles(1, 2), async (req, res) =>
     }
 });
 
-// Listar todos los usuarios (solo Administrador)
-app.get('/api/usuarios', authMiddleware, requireRoles(1), async (req, res) => {
+// Listar todos los usuarios (Administrador y Dispatcher)
+app.get('/api/usuarios', authMiddleware, requireRoles(1, 2), async (req, res) => {
     try {
         const [usuarios] = await pool.query(
             `SELECT u.id_usuario, u.id_rol, u.nombre, u.correo, u.telefono, u.estado, u.creado_en, r.nombre_rol
@@ -193,8 +193,8 @@ app.get('/api/usuarios', authMiddleware, requireRoles(1), async (req, res) => {
     }
 });
 
-// Crear usuario (solo Administrador)
-app.post('/api/usuarios', authMiddleware, requireRoles(1), async (req, res) => {
+// Crear usuario (Administrador y Dispatcher)
+app.post('/api/usuarios', authMiddleware, requireRoles(1, 2), async (req, res) => {
     try {
         const { id_rol, nombre, correo, telefono, password } = req.body;
         if (!id_rol || !nombre || !correo || !password) {
