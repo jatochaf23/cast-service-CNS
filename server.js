@@ -147,7 +147,8 @@ app.put('/api/auth/cambiar-password', authMiddleware, async (req, res) => {
             return res.status(400).json({ success: false, message: 'La contraseña actual ingresada es incorrecta.' });
         }
 
-        await pool.query('UPDATE usuarios SET password = ? WHERE id_usuario = ?', [password_nuevo.trim(), req.user.id_usuario]);
+        const hashedPassword = await bcrypt.hash(password_nuevo.trim(), 10);
+        await pool.query('UPDATE usuarios SET password = ? WHERE id_usuario = ?', [hashedPassword, req.user.id_usuario]);
 
         res.json({ success: true, message: 'Contraseña actualizada correctamente.' });
     } catch (err) {
@@ -206,10 +207,12 @@ app.post('/api/usuarios', authMiddleware, requireRoles(1, 2), async (req, res) =
             return res.status(400).json({ success: false, message: 'El correo electrónico ya se encuentra registrado.' });
         }
 
+        const hashedPassword = await bcrypt.hash(password.trim(), 10);
+
         await pool.query(
             `INSERT INTO usuarios (id_rol, nombre, correo, telefono, password, estado)
              VALUES (?, ?, ?, ?, ?, 'Activo')`,
-            [id_rol, nombre.trim(), correo.trim(), telefono || null, password]
+            [id_rol, nombre.trim(), correo.trim(), telefono || null, hashedPassword]
         );
 
         res.json({ success: true, message: 'Usuario creado exitosamente.' });
