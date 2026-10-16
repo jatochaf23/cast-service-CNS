@@ -220,12 +220,49 @@
 
         .satisfaction-group {
             display: flex;
-            gap: 8px;
+            align-items: center;
+            gap: 16px;
             margin-bottom: 4px;
         }
 
-        .satisfaction-group label {
-            font-weight: normal;
+        .satisfaction-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            user-select: none;
+            padding: 2px 4px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .satisfaction-item:hover {
+            background-color: #f1f5f9;
+        }
+
+        .satisfaction-item input[type="radio"] {
+            margin: 0;
+            cursor: pointer;
+            accent-color: #0284c7;
+        }
+
+        .satisfaction-face {
+            font-size: 1.25em;
+            line-height: 1;
+            filter: grayscale(40%);
+            transition: transform 0.15s ease, filter 0.15s ease;
+        }
+
+        .satisfaction-item:hover .satisfaction-face,
+        .satisfaction-item input[type="radio"]:checked + .satisfaction-face {
+            filter: grayscale(0%);
+            transform: scale(1.18);
+        }
+
+        .satisfaction-num {
+            font-size: 0.82em;
+            font-weight: 700;
+            color: #475569;
         }
 
         .time-inputs-single-line {
@@ -936,11 +973,31 @@
             <div class="form-section">
                  <h3>Satisfacción General con el servicio Técnico</h3>
                  <div class="satisfaction-group">
-                    <label>1 <input type="radio" name="satisfaccion" value="1"></label>
-                    <label>2 <input type="radio" name="satisfaccion" value="2"></label>
-                    <label>3 <input type="radio" name="satisfaccion" value="3"></label>
-                    <label>4 <input type="radio" name="satisfaccion" value="4"></label>
-                    <label>5 <input type="radio" name="satisfaccion" value="5"></label>
+                    <label class="satisfaction-item" title="1 - Muy insatisfecho">
+                        <input type="radio" name="satisfaccion" value="1">
+                        <span class="satisfaction-face">😡</span>
+                        <span class="satisfaction-num">1</span>
+                    </label>
+                    <label class="satisfaction-item" title="2 - Insatisfecho">
+                        <input type="radio" name="satisfaccion" value="2">
+                        <span class="satisfaction-face">🙁</span>
+                        <span class="satisfaction-num">2</span>
+                    </label>
+                    <label class="satisfaction-item" title="3 - Neutral">
+                        <input type="radio" name="satisfaccion" value="3">
+                        <span class="satisfaction-face">😐</span>
+                        <span class="satisfaction-num">3</span>
+                    </label>
+                    <label class="satisfaction-item" title="4 - Satisfecho">
+                        <input type="radio" name="satisfaccion" value="4">
+                        <span class="satisfaction-face">🙂</span>
+                        <span class="satisfaction-num">4</span>
+                    </label>
+                    <label class="satisfaction-item" title="5 - Muy satisfecho">
+                        <input type="radio" name="satisfaccion" value="5">
+                        <span class="satisfaction-face">😁</span>
+                        <span class="satisfaction-num">5</span>
+                    </label>
                  </div>
                  <div class="time-inputs-single-line">
                     <div class="time-field-item">
@@ -1429,6 +1486,11 @@
                             if (input.name) {
                                 // Omitir partes ya que fueron procesadas arriba
                                 if (input.name.startsWith('parte-cant-') || input.name.startsWith('parte-desc-')) {
+                                    return;
+                                }
+
+                                // Omitir inputs ocultos como correlativo-input para no duplicar número en PDF
+                                if (input.type === 'hidden' || input.name === 'correlativo' || input.id === 'correlativo-input') {
                                     return;
                                 }
 
