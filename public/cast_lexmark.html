@@ -207,7 +207,7 @@
 
         .parts-col-header {
             display: grid;
-            grid-template-columns: 42px 1fr;
+            grid-template-columns: 42px 1fr 20px;
             gap: 3px;
             font-size: 0.82em;
             font-weight: bold;
@@ -216,8 +216,48 @@
 
         .parts-pair {
             display: grid;
-            grid-template-columns: 42px 1fr;
+            grid-template-columns: 42px 1fr 20px;
             gap: 3px;
+            align-items: center;
+        }
+
+        .btn-add-part {
+            background-color: #f8fafc;
+            color: #334155;
+            border: 1px dashed #94a3b8;
+            padding: 4px 12px;
+            font-size: 11px;
+            font-weight: 600;
+            border-radius: 5px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+        .btn-add-part:hover {
+            background-color: #f1f5f9;
+            border-color: #475569;
+            color: #0f172a;
+        }
+        .btn-remove-part {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0 4px;
+            line-height: 1;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.15s, background-color 0.15s;
+        }
+        .btn-remove-part:hover {
+            color: #ef4444;
+            background-color: #fee2e2;
         }
 
         .satisfaction-group {
@@ -790,6 +830,20 @@
                 grid-template-columns: 1fr !important;
             }
 
+            .btn-remove-part,
+            .btn-add-part,
+            .parts-actions-bar {
+                display: none !important;
+            }
+
+            .parts-pair {
+                grid-template-columns: 42px 1fr !important;
+            }
+
+            .parts-col-header {
+                grid-template-columns: 42px 1fr !important;
+            }
+
             .signature-section {
                 margin-top: 2px !important;
                 page-break-inside: avoid !important;
@@ -919,32 +973,65 @@
                 <label for="actividad-realizada">Actividad realizada:</label>
                 <textarea id="actividad-realizada" name="actividad-realizada" rows="3"></textarea>
             </div>
-            <div class="form-section">
+            <div class="form-section" id="section-repuestos">
                 <div class="parts-header">
-                    <h3>Utilización de Partes</h3>
+                    <h3>Utilización de Repuestos</h3>
                     <div class="radio-inline">
-                        <label><input type="radio" name="utilizacion-partes" value="si"> Si</label>
-                        <label><input type="radio" name="utilizacion-partes" value="no"> No</label>
+                        <label style="cursor: pointer; display: inline-flex; align-items: center; gap: 6px; font-weight: 600;">
+                            <input type="checkbox" id="check-repuestos-utilizados" name="repuestos_utilizados_check">
+                            <span>Repuestos utilizados</span>
+                        </label>
+                        <span class="repuestos-radios-group" style="color: #94a3b8; font-size: 0.88em; display: inline-flex; align-items: center; gap: 4px;">(
+                            <label style="cursor: pointer; display: inline-flex; align-items: center; gap: 3px; font-weight: normal;">
+                                <input type="radio" name="utilizacion-partes" value="si" id="radio-repuestos-si"> Sí
+                            </label>
+                            <label style="cursor: pointer; display: inline-flex; align-items: center; gap: 3px; font-weight: normal; margin-left: 6px;">
+                                <input type="radio" name="utilizacion-partes" value="no" id="radio-repuestos-no" checked> No
+                            </label>
+                        )</span>
                     </div>
                 </div>
-                <div class="parts-grid-tripled">
-                    <div class="parts-col-header">
-                        <span>Cant.</span><span>Código/Descripción</span>
-                    </div>
-                    <div class="parts-col-header">
-                        <span>Cant.</span><span>Código/Descripción</span>
-                    </div>
-                    <div class="parts-col-header">
-                        <span>Cant.</span><span>Código/Descripción</span>
+
+                <!-- Contenedor dinámico de repuestos -->
+                <div id="repuestos-container" class="repuestos-container" style="display: none; margin-top: 8px;">
+                    <div class="parts-grid-tripled" id="parts-grid">
+                        <div class="parts-col-header">
+                            <span>Cant.</span><span>Código / Descripción</span>
+                        </div>
+                        <div class="parts-col-header">
+                            <span>Cant.</span><span>Código / Descripción</span>
+                        </div>
+                        <div class="parts-col-header">
+                            <span>Cant.</span><span>Código / Descripción</span>
+                        </div>
+
+                        <!-- Filas iniciales de repuestos -->
+                        <div class="parts-pair" data-part-index="1">
+                            <input type="text" name="parte-cant-1" placeholder="Cant.">
+                            <input type="text" name="parte-desc-1" placeholder="Código / Descripción del repuesto">
+                            <button type="button" class="btn-remove-part" title="Eliminar fila" tabindex="-1">×</button>
+                        </div>
+                        <div class="parts-pair" data-part-index="2">
+                            <input type="text" name="parte-cant-2" placeholder="Cant.">
+                            <input type="text" name="parte-desc-2" placeholder="Código / Descripción del repuesto">
+                            <button type="button" class="btn-remove-part" title="Eliminar fila" tabindex="-1">×</button>
+                        </div>
+                        <div class="parts-pair" data-part-index="3">
+                            <input type="text" name="parte-cant-3" placeholder="Cant.">
+                            <input type="text" name="parte-desc-3" placeholder="Código / Descripción del repuesto">
+                            <button type="button" class="btn-remove-part" title="Eliminar fila" tabindex="-1">×</button>
+                        </div>
                     </div>
 
-                    <div class="parts-pair"><input type="text" name="parte-cant-1"><input type="text" name="parte-desc-1"></div>
-                    <div class="parts-pair"><input type="text" name="parte-cant-2"><input type="text" name="parte-desc-2"></div>
-                    <div class="parts-pair"><input type="text" name="parte-cant-3"><input type="text" name="parte-desc-3"></div>
-
-                    <div class="parts-pair"><input type="text" name="parte-cant-4"><input type="text" name="parte-desc-4"></div>
-                    <div class="parts-pair"><input type="text" name="parte-cant-5"><input type="text" name="parte-desc-5"></div>
-                    <div class="parts-pair"><input type="text" name="parte-cant-6"><input type="text" name="parte-desc-6"></div>
+                    <div class="parts-actions-bar" style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                        <button type="button" id="btn-add-part" class="btn-add-part" title="Agregar otra fila de repuesto">
+                            <svg style="width: 14px; height: 14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                            <span>+ Agregar más repuestos</span>
+                        </button>
+                        <span id="repuestos-count-badge" style="font-size: 11px; color: #64748b;">
+                            Repuestos listados: <strong id="repuestos-total-count">3</strong>
+                        </span>
+                    </div>
                 </div>
             </div>
             <div class="form-section">
@@ -1336,20 +1423,139 @@
                 }
             });
 
-            // Sincronización de partes utilizadas y auto-check "Si"
-            const partInputs = document.querySelectorAll('input[name^="parte-cant-"], input[name^="parte-desc-"]');
-            partInputs.forEach(input => {
-                input.addEventListener('input', () => {
-                    const hasVal = Array.from(partInputs).some(inp => inp.value.trim() !== '');
-                    const radioSi = document.querySelector('input[name="utilizacion-partes"][value="si"]');
-                    const radioNo = document.querySelector('input[name="utilizacion-partes"][value="no"]');
-                    if (hasVal && radioSi) {
-                        radioSi.checked = true;
-                    } else if (!hasVal && radioNo && !radioSi.checked) {
-                        radioNo.checked = true;
+            // ==========================================
+            // GESTIÓN DINÁMICA DE UTILIZACIÓN DE REPUESTOS
+            // ==========================================
+            const checkRepuestos = document.getElementById('check-repuestos-utilizados');
+            const radioRepSi = document.getElementById('radio-repuestos-si');
+            const radioRepNo = document.getElementById('radio-repuestos-no');
+            const repuestosContainer = document.getElementById('repuestos-container');
+            const partsGrid = document.getElementById('parts-grid');
+            const btnAddPart = document.getElementById('btn-add-part');
+            const repuestosCountEl = document.getElementById('repuestos-total-count');
+
+            let nextPartIdx = 4; // Filas iniciales 1, 2, 3
+
+            function updateRepuestosCounter() {
+                if (repuestosCountEl && partsGrid) {
+                    const count = partsGrid.querySelectorAll('.parts-pair').length;
+                    repuestosCountEl.textContent = count;
+                }
+            }
+
+            function setRepuestosVisibility(isVisible, focusInput = false) {
+                if (!repuestosContainer) return;
+                if (isVisible) {
+                    repuestosContainer.style.display = 'block';
+                    if (checkRepuestos) checkRepuestos.checked = true;
+                    if (radioRepSi) radioRepSi.checked = true;
+                    if (radioRepNo) radioRepNo.checked = false;
+
+                    if (partsGrid && partsGrid.querySelectorAll('.parts-pair').length === 0) {
+                        addNewPartRow(false);
+                    }
+
+                    if (focusInput) {
+                        const firstInput = repuestosContainer.querySelector('input[name^="parte-desc"], input[name^="parte-cant"]');
+                        if (firstInput) setTimeout(() => firstInput.focus(), 60);
+                    }
+                } else {
+                    repuestosContainer.style.display = 'none';
+                    if (checkRepuestos) checkRepuestos.checked = false;
+                    if (radioRepSi) radioRepSi.checked = false;
+                    if (radioRepNo) radioRepNo.checked = true;
+                }
+                updateRepuestosCounter();
+            }
+            window.setRepuestosVisibility = setRepuestosVisibility;
+
+            if (checkRepuestos) {
+                checkRepuestos.addEventListener('change', () => {
+                    setRepuestosVisibility(checkRepuestos.checked, checkRepuestos.checked);
+                    form.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+            }
+            if (radioRepSi) {
+                radioRepSi.addEventListener('change', () => {
+                    if (radioRepSi.checked) {
+                        setRepuestosVisibility(true, true);
+                        form.dispatchEvent(new Event('change', { bubbles: true }));
                     }
                 });
-            });
+            }
+            if (radioRepNo) {
+                radioRepNo.addEventListener('change', () => {
+                    if (radioRepNo.checked) {
+                        setRepuestosVisibility(false, false);
+                        form.dispatchEvent(new Event('change', { bubbles: true }));
+                    }
+                });
+            }
+
+            function attachPartRowEvents(row) {
+                const btnRemove = row.querySelector('.btn-remove-part');
+                if (btnRemove) {
+                    btnRemove.addEventListener('click', () => {
+                        row.remove();
+                        updateRepuestosCounter();
+                        form.dispatchEvent(new Event('change', { bubbles: true }));
+                    });
+                }
+                const inputs = row.querySelectorAll('input');
+                inputs.forEach(inp => {
+                    inp.addEventListener('input', () => {
+                        if (inp.value.trim() !== '') {
+                            if (checkRepuestos && !checkRepuestos.checked) checkRepuestos.checked = true;
+                            if (radioRepSi && !radioRepSi.checked) radioRepSi.checked = true;
+                            if (radioRepNo) radioRepNo.checked = false;
+                            if (repuestosContainer && repuestosContainer.style.display === 'none') {
+                                repuestosContainer.style.display = 'block';
+                            }
+                        }
+                    });
+                });
+            }
+
+            function addNewPartRow(shouldFocus = true) {
+                if (!partsGrid) return null;
+                const idx = nextPartIdx++;
+                const newRow = document.createElement('div');
+                newRow.className = 'parts-pair';
+                newRow.setAttribute('data-part-index', idx);
+                newRow.innerHTML = `
+                    <input type="text" name="parte-cant-${idx}" placeholder="Cant.">
+                    <input type="text" name="parte-desc-${idx}" placeholder="Código / Descripción del repuesto">
+                    <button type="button" class="btn-remove-part" title="Eliminar fila" tabindex="-1">×</button>
+                `;
+                partsGrid.appendChild(newRow);
+                attachPartRowEvents(newRow);
+                updateRepuestosCounter();
+
+                if (shouldFocus) {
+                    const cantInp = newRow.querySelector(`[name="parte-cant-${idx}"]`);
+                    if (cantInp) cantInp.focus();
+                }
+                form.dispatchEvent(new Event('change', { bubbles: true }));
+                return newRow;
+            }
+
+            window.ensurePartRowsCount = function(maxIdx) {
+                while (nextPartIdx <= maxIdx) {
+                    addNewPartRow(false);
+                }
+            };
+
+            if (btnAddPart) {
+                btnAddPart.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    addNewPartRow(true);
+                });
+            }
+
+            if (partsGrid) {
+                partsGrid.querySelectorAll('.parts-pair').forEach(attachPartRowEvents);
+                updateRepuestosCounter();
+            }
 
             function updatePartsPrintClasses() {
                 const pairs = document.querySelectorAll('.parts-pair');
@@ -1367,8 +1573,9 @@
 
                 const grid = document.querySelector('.parts-grid-tripled');
                 const radioNo = document.querySelector('input[name="utilizacion-partes"][value="no"]');
+                const isNo = (radioNo && radioNo.checked) || (checkRepuestos && !checkRepuestos.checked);
                 if (grid) {
-                    if (filledCount === 0 || (radioNo && radioNo.checked && filledCount === 0)) {
+                    if (filledCount === 0 || (isNo && filledCount === 0)) {
                         grid.classList.add('all-empty-parts');
                     } else {
                         grid.classList.remove('all-empty-parts');
@@ -1419,27 +1626,39 @@
 
                         // 1. Procesar Utilización de Partes: renderizar solo las usadas o contraer si no hay
                         const filledParts = [];
-                        for (let i = 1; i <= 6; i++) {
-                            const cantVal = (form.querySelector(`[name="parte-cant-${i}"]`)?.value || '').trim();
-                            const descVal = (form.querySelector(`[name="parte-desc-${i}"]`)?.value || '').trim();
+                        const allPairs = form.querySelectorAll('.parts-pair');
+                        allPairs.forEach(pair => {
+                            const cantVal = (pair.querySelector('input[name^="parte-cant"]')?.value || '').trim();
+                            const descVal = (pair.querySelector('input[name^="parte-desc"]')?.value || '').trim();
                             if (cantVal || descVal) {
                                 filledParts.push({ cant: cantVal, desc: descVal });
                             }
-                        }
+                        });
 
                         const clonedPartsGrid = clonedForm.querySelector('.parts-grid-tripled');
+                        const clonedRepContainer = clonedForm.querySelector('#repuestos-container');
+                        const clonedActionsBar = clonedForm.querySelector('.parts-actions-bar');
+                        if (clonedActionsBar) clonedActionsBar.style.display = 'none';
+                        clonedForm.querySelectorAll('.btn-remove-part').forEach(b => b.style.display = 'none');
+
                         if (clonedPartsGrid) {
                             if (filledParts.length === 0) {
                                 clonedPartsGrid.style.display = 'none';
+                                if (clonedRepContainer) clonedRepContainer.style.display = 'none';
                                 const radioNo = clonedForm.querySelector('input[name="utilizacion-partes"][value="no"]');
                                 const radioSi = clonedForm.querySelector('input[name="utilizacion-partes"][value="si"]');
+                                const checkRepCloned = clonedForm.querySelector('#check-repuestos-utilizados');
+                                if (checkRepCloned) checkRepCloned.checked = false;
                                 if (!radioSi?.checked && radioNo) {
                                     radioNo.checked = true;
                                     radioNo.setAttribute('checked', 'checked');
                                 }
                             } else {
+                                if (clonedRepContainer) clonedRepContainer.style.display = 'block';
                                 const radioSi = clonedForm.querySelector('input[name="utilizacion-partes"][value="si"]');
                                 const radioNo = clonedForm.querySelector('input[name="utilizacion-partes"][value="no"]');
+                                const checkRepCloned = clonedForm.querySelector('#check-repuestos-utilizados');
+                                if (checkRepCloned) checkRepCloned.checked = true;
                                 if (radioSi) {
                                     radioSi.checked = true;
                                     radioSi.setAttribute('checked', 'checked');

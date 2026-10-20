@@ -652,6 +652,21 @@
 
             isRestoringDraft = true;
 
+            // Crear filas de repuestos necesarias si el borrador guardó repuestos adicionales
+            if (data.inputs && typeof window.ensurePartRowsCount === 'function') {
+                let maxPartIdx = 0;
+                Object.keys(data.inputs).forEach(k => {
+                    const m = k.match(/^parte-(?:cant|desc)-(\d+)$/);
+                    if (m) {
+                        const idx = parseInt(m[1], 10);
+                        if (idx > maxPartIdx) maxPartIdx = idx;
+                    }
+                });
+                if (maxPartIdx > 0) {
+                    window.ensurePartRowsCount(maxPartIdx);
+                }
+            }
+
             // Restaurar inputs
             Object.entries(data.inputs).forEach(([idOrName, val]) => {
                 if (!val) return;
@@ -660,7 +675,7 @@
                     el.value = val;
                 } else if (el && el.value !== val) {
                     // Si ya tenía dato precargado de BD, solo sobreescribir si el borrador tiene algo redactado por el técnico
-                    if (['falla-real', 'actividad-realizada', 'falla-usuario', 'falla_reportada', 'h_l_c', 'h_s_c', 'h_l_t', 'h_s_t', 'rep-tecnico-nombre', 'usuario-nombre', 'usuario-dni', 'contador_total', 'cont_ini', 'cont_fin', 'kit_mantenimiento', 'voltaje_fn', 'voltaje_ft', 'voltaje_tn'].includes(idOrName) || idOrName.startsWith('parte_') || idOrName.startsWith('desc_')) {
+                    if (['falla-real', 'actividad-realizada', 'falla-usuario', 'falla_reportada', 'h_l_c', 'h_s_c', 'h_l_t', 'h_s_t', 'rep-tecnico-nombre', 'usuario-nombre', 'usuario-dni', 'contador_total', 'cont_ini', 'cont_fin', 'kit_mantenimiento', 'voltaje_fn', 'voltaje_ft', 'voltaje_tn'].includes(idOrName) || idOrName.startsWith('parte_') || idOrName.startsWith('desc_') || idOrName.startsWith('parte-')) {
                         el.value = val;
                     }
                 }
@@ -686,6 +701,14 @@
                     const r = document.querySelector(`input[type="radio"][name="${name}"][value="${val}"]`);
                     if (r) r.checked = true;
                 });
+            }
+
+            // Sincronizar visibilidad de repuestos si el borrador tenía "si", checkbox marcado o repuestos con texto
+            const hasPartData = data.inputs && Object.entries(data.inputs).some(([k, v]) => k.startsWith('parte-') && v && v.trim && v.trim().length > 0);
+            const hasPartRadioSi = data.radios && data.radios['utilizacion-partes'] === 'si';
+            const hasPartCheck = data.checkboxes && (data.checkboxes['check-repuestos-utilizados'] || data.checkboxes['check-repuestos-utilizados_true']);
+            if ((hasPartData || hasPartRadioSi || hasPartCheck) && typeof window.setRepuestosVisibility === 'function') {
+                window.setRepuestosVisibility(true);
             }
 
             // Restaurar firmas
