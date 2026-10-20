@@ -650,7 +650,7 @@
                     el.value = val;
                 } else if (el && el.value !== val) {
                     // Si ya tenía dato precargado de BD, solo sobreescribir si el borrador tiene algo redactado por el técnico
-                    if (['falla-real', 'actividad-realizada', 'falla-usuario', 'falla_reportada', 'h_l_c', 'h_s_c', 'h_l_t', 'h_s_t', 'rep-tecnico-nombre', 'usuario-nombre', 'usuario-dni', 'contador_total'].includes(idOrName) || idOrName.startsWith('parte_') || idOrName.startsWith('desc_')) {
+                    if (['falla-real', 'actividad-realizada', 'falla-usuario', 'falla_reportada', 'h_l_c', 'h_s_c', 'h_l_t', 'h_s_t', 'rep-tecnico-nombre', 'usuario-nombre', 'usuario-dni', 'contador_total', 'cont_ini', 'cont_fin', 'kit_mantenimiento', 'voltaje_fn', 'voltaje_ft', 'voltaje_tn'].includes(idOrName) || idOrName.startsWith('parte_') || idOrName.startsWith('desc_')) {
                         el.value = val;
                     }
                 }
