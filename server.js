@@ -202,7 +202,8 @@ app.post('/api/usuarios', authMiddleware, requireRoles(1, 2), async (req, res) =
             return res.status(400).json({ success: false, message: 'Todos los campos obligatorios deben ser llenados.' });
         }
 
-        const [exists] = await pool.query('SELECT id_usuario FROM usuarios WHERE correo = ?', [correo.trim()]);
+        const correoNormalizado = correo.trim().toLowerCase();
+        const [exists] = await pool.query('SELECT id_usuario FROM usuarios WHERE LOWER(correo) = ?', [correoNormalizado]);
         if (exists.length > 0) {
             return res.status(400).json({ success: false, message: 'El correo electrónico ya se encuentra registrado.' });
         }
@@ -212,13 +213,13 @@ app.post('/api/usuarios', authMiddleware, requireRoles(1, 2), async (req, res) =
         await pool.query(
             `INSERT INTO usuarios (id_rol, nombre, correo, telefono, password, estado)
              VALUES (?, ?, ?, ?, ?, 'Activo')`,
-            [id_rol, nombre.trim(), correo.trim(), telefono || null, hashedPassword]
+            [parseInt(id_rol), nombre.trim(), correoNormalizado, telefono ? telefono.trim() : null, hashedPassword]
         );
 
         res.json({ success: true, message: 'Usuario creado exitosamente.' });
     } catch (err) {
         console.error('Error al crear usuario:', err);
-        res.status(500).json({ success: false, message: 'Error al registrar usuario.' });
+        res.status(500).json({ success: false, message: err.message || 'Error al registrar usuario.' });
     }
 });
 

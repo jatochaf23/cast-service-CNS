@@ -1745,7 +1745,7 @@
         async function loadAllUsers() {
             const token = localStorage.getItem('cast_token');
             try {
-                const res = await fetch('/api/usuarios', {
+                const res = await fetch(`${API_BASE}/api/usuarios`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
                 const data = await res.json();
@@ -1777,7 +1777,7 @@
             };
 
             try {
-                const res = await fetch('/api/usuarios', {
+                const res = await fetch(`${API_BASE}/api/usuarios`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
