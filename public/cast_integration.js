@@ -134,6 +134,9 @@
             box-shadow: none !important;
             border-color: #cbd5e1 !important;
         }
+        input[type="date"].field-auto-locked {
+            pointer-events: none !important;
+        }
         .checkbox-auto-locked {
             pointer-events: none !important;
             opacity: 0.85;
@@ -409,8 +412,15 @@
         }
 
         // Fecha de servicio programada (Bloqueado si vino programado)
-        if (ticket.fecha_servicio) {
-            setInputValue('fecha', ticket.fecha_servicio, true);
+        const fechaProgramada = ticket.fecha_servicio || ticket.fecha_atencion;
+        if (fechaProgramada) {
+            let fStr = String(fechaProgramada).trim();
+            if (fStr.includes('T')) fStr = fStr.split('T')[0];
+            if (fStr.length >= 10 && /^\d{4}-\d{2}-\d{2}/.test(fStr)) {
+                setInputValue('fecha', fStr.slice(0, 10), true);
+            } else {
+                setInputValue('fecha', fStr, true);
+            }
         }
 
         // Hora de servicio programada

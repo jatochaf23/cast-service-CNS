@@ -274,7 +274,10 @@ app.get('/api/tickets/:id', authMiddleware, async (req, res) => {
         const ticketIdOrNumber = req.params.id;
 
         const [rows] = await pool.query(
-            `SELECT t.*, u.nombre as nombre_tecnico, u.correo as correo_tecnico
+            `SELECT t.*, 
+                    t.fecha_servicio::text as fecha_servicio,
+                    u.nombre as nombre_tecnico, 
+                    u.correo as correo_tecnico
              FROM ticket t
              LEFT JOIN usuarios u ON t.id_usuario_asignado = u.id_usuario
              WHERE CAST(t.id_ticket AS TEXT) = ? OR LOWER(TRIM(t.numero_ticket)) = LOWER(TRIM(?))`,

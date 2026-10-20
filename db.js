@@ -3,6 +3,8 @@ const { Pool, types } = require('pg');
 
 // Convertir bigint/COUNT(*) a número entero en JavaScript
 types.setTypeParser(20, (val) => (val === null ? null : parseInt(val, 10)));
+// Mantener tipo DATE de PostgreSQL (OID 1082) como string 'YYYY-MM-DD' nativo para evitar desfases UTC
+types.setTypeParser(1082, (val) => val);
 
 const connectionString = process.env.DATABASE_URL || 
     `postgresql://${process.env.DB_USER || 'postgres'}:${encodeURIComponent(process.env.DB_PASSWORD || '')}@${process.env.DB_HOST || 'aws-0-us-west-2.pooler.supabase.com'}:${process.env.DB_PORT || 5432}/${process.env.DB_NAME || 'postgres'}`;
