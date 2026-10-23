@@ -1035,12 +1035,14 @@
 
             <div class="form-section">
                 <div class="checkbox-group single-line">
-                    <label><input type="checkbox" name="tipo_servicio" value="contrato"> Contrato</label>
                     <label><input type="checkbox" name="tipo_servicio" value="garantia"> Garantía de marca</label>
                     <label><input type="checkbox" name="tipo_servicio" value="requerimiento"> Requerimiento</label>
                     <label><input type="checkbox" name="tipo_servicio" value="mantenimiento"> Mantenimiento Preventivo</label>
                     <label><input type="checkbox" name="tipo_servicio" value="incidencia"> Incidencia</label>
-                    <label><input type="checkbox" name="tipo_servicio" value="otros"> Otros</label>
+                    <label style="display: inline-flex; align-items: center; gap: 4px; margin: 0;">
+                        <input type="checkbox" name="tipo_servicio" value="otros" id="tipo-servicio-otros"> Otros:
+                        <input type="text" id="tipo-servicio-otros-desc" name="tipo_servicio_otros_desc" placeholder="..................................." class="input-otros">
+                    </label>
                 </div>
             </div>
 
@@ -1183,6 +1185,8 @@
                     </div>
                     <label for="rep-tecnico-nombre">Rep. Tec:</label>
                     <input type="text" id="rep-tecnico-nombre" name="rep-tecnico-nombre">
+                    <label for="rep-tecnico-dni" style="margin-top: 3px;">DNI:</label>
+                    <input type="text" id="rep-tecnico-dni" name="rep-tecnico-dni" maxlength="15" placeholder="N° de DNI">
                 </div>
                 <div class="signature-area">
                      <div class="signature-container">
@@ -1680,6 +1684,16 @@
                 });
             }
 
+            const tipoServicioOtrosDesc = document.getElementById('tipo-servicio-otros-desc');
+            const tipoServicioOtrosCb = document.getElementById('tipo-servicio-otros');
+            if (tipoServicioOtrosDesc && tipoServicioOtrosCb) {
+                tipoServicioOtrosDesc.addEventListener('input', () => {
+                    if (tipoServicioOtrosDesc.value.trim() !== '') {
+                        tipoServicioOtrosCb.checked = true;
+                    }
+                });
+            }
+
             form.addEventListener('submit', function (event) {
                 event.preventDefault();
 
@@ -1859,7 +1873,7 @@
                                             textDiv.style.display = 'inline-block';
                                         }
 
-                                        if (input.id === 'equipo-otros-desc' || input.name === 'equipo_otros_desc') {
+                                        if (input.id === 'equipo-otros-desc' || input.name === 'equipo_otros_desc' || input.id === 'tipo-servicio-otros-desc' || input.name === 'tipo_servicio_otros_desc') {
                                             textDiv.style.display = 'inline-block';
                                             textDiv.style.width = '130px';
                                             textDiv.style.minHeight = '18px';
