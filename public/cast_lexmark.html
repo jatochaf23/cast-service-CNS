@@ -9,12 +9,21 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+        }
+
         body {
-            font-family: sans-serif;
+            font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
             background-color: #fafafa;
-            color: #333;
+            color: #1e293b;
             margin: 0;
             padding: 5px;
+        }
+
+        input, textarea, select, button, label, p, h2, h3, span {
+            font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
         }
 
         .form-container {
@@ -95,10 +104,45 @@
 
         .form-number-date {
             text-align: right;
+            display: flex;
+            justify-content: flex-end;
+            align-items: flex-end;
         }
 
         .date-field {
-            margin-top: 2px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin: 0;
+        }
+
+        .date-field label {
+            margin: 0;
+            font-weight: bold;
+            font-size: 0.9em;
+            white-space: nowrap;
+            color: #1e293b;
+        }
+
+        .date-field input[type="date"] {
+            width: auto;
+            font-size: 0.92em;
+            font-weight: 600;
+            padding: 2px 6px;
+        }
+
+        .input-otros {
+            border: none;
+            border-bottom: 1px dotted #475569;
+            padding: 0 4px;
+            font-size: 0.88em;
+            width: 140px;
+            background: transparent;
+            outline: none;
+            color: #0f172a;
+        }
+        .input-otros:focus {
+            border-bottom: 1px solid #2563eb;
         }
 
         .form-section {
@@ -694,13 +738,14 @@
         @media print {
             @page {
                 size: A4 portrait;
-                margin: 0mm;
+                margin: 4mm 5mm;
             }
 
             * {
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
                 box-sizing: border-box !important;
+                font-family: Arial, "Helvetica Neue", Helvetica, sans-serif !important;
             }
 
             html, body {
@@ -709,6 +754,7 @@
                 margin: 0 !important;
                 padding: 0 !important;
                 background: #ffffff !important;
+                font-family: Arial, "Helvetica Neue", Helvetica, sans-serif !important;
                 overflow: hidden !important;
             }
 
@@ -726,7 +772,7 @@
                 width: 100% !important;
                 max-width: 100% !important;
                 margin: 0 auto !important;
-                padding: 2mm 5mm !important;
+                padding: 1mm 2mm !important;
                 box-shadow: none !important;
                 border: none !important;
                 border-radius: 0 !important;
@@ -738,14 +784,45 @@
                 break-after: avoid !important;
                 page-break-before: avoid !important;
                 break-before: avoid !important;
-                zoom: 0.81 !important;
+                zoom: 0.94 !important;
             }
 
             @supports not (zoom: 1) {
                 .form-container {
-                    transform: scale(0.81) !important;
+                    transform: scale(0.94) !important;
                     transform-origin: top center !important;
                 }
+            }
+
+            .form-number-date {
+                display: flex !important;
+                justify-content: flex-end !important;
+                align-items: center !important;
+            }
+
+            .date-field {
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+            }
+
+            .date-field label {
+                margin: 0 !important;
+                font-weight: bold !important;
+                white-space: nowrap !important;
+            }
+
+            .date-field input[type="date"] {
+                width: auto !important;
+                display: inline-block !important;
+            }
+
+            .input-otros {
+                border: none !important;
+                border-bottom: 1px dotted #475569 !important;
+                background: transparent !important;
+                width: 130px !important;
+                display: inline-block !important;
             }
 
             .form-header {
@@ -940,7 +1017,10 @@
             <div class="form-section">
                 <div class="checkbox-group">
                     <label><input type="checkbox" name="equipo" value="impresora"> Impresora</label>
-                    <label><input type="checkbox" name="equipo" value="otros"> Otros</label>
+                    <label style="display: inline-flex; align-items: center; gap: 4px; margin: 0;">
+                        <input type="checkbox" name="equipo" value="otros" id="equipo-otros"> Otros:
+                        <input type="text" id="equipo-otros-desc" name="equipo_otros_desc" placeholder="..................................." class="input-otros">
+                    </label>
                 </div>
                 <div class="grid-container">
                     <div class="grid-item">
@@ -1072,9 +1152,9 @@
                 <label for="estado-equipo">Estado del Equipo:</label>
                 <textarea id="estado-equipo" name="estado-equipo" rows="1"></textarea>
                 <label for="observaciones">Observaciones/Recomendación:</label>
-                <textarea id="observaciones" name="observaciones" rows="1"></textarea>
+                <textarea id="observaciones" name="observaciones" rows="1" placeholder="Sin observación/recomendación"></textarea>
                 <label for="observaciones-cliente">Observaciones del cliente:</label>
-                <textarea id="observaciones-cliente" name="observaciones-cliente" rows="1"></textarea>
+                <textarea id="observaciones-cliente" name="observaciones-cliente" rows="1" placeholder="Sin observación/recomendación"></textarea>
             </div>
             <div class="form-section">
                  <h3>Satisfacción General con el servicio Técnico</h3>
@@ -1593,7 +1673,20 @@
                 }
             }
 
-            window.addEventListener('beforeprint', updatePartsPrintClasses);
+            window.addEventListener('beforeprint', () => {
+                updatePartsPrintClasses();
+                const obs = document.getElementById('observaciones');
+                const obsCli = document.getElementById('observaciones-cliente');
+                if (obs && !obs.value.trim()) {
+                    obs.value = 'Sin observación/recomendación';
+                    obs.setAttribute('data-autofilled', 'true');
+                }
+                if (obsCli && !obsCli.value.trim()) {
+                    obsCli.value = 'Sin observación/recomendación';
+                    obsCli.setAttribute('data-autofilled', 'true');
+                }
+            });
+
             window.addEventListener('afterprint', () => {
                 document.querySelectorAll('.parts-pair.empty-part').forEach(p => p.classList.remove('empty-part'));
                 const grid = document.querySelector('.parts-grid-tripled');
@@ -1601,7 +1694,27 @@
                     grid.classList.remove('all-empty-parts', 'single-col-parts');
                     grid.querySelectorAll('.parts-col-header').forEach(h => h.classList.remove('empty-header'));
                 }
+                const obs = document.getElementById('observaciones');
+                const obsCli = document.getElementById('observaciones-cliente');
+                if (obs && obs.getAttribute('data-autofilled') === 'true') {
+                    obs.value = '';
+                    obs.removeAttribute('data-autofilled');
+                }
+                if (obsCli && obsCli.getAttribute('data-autofilled') === 'true') {
+                    obsCli.value = '';
+                    obsCli.removeAttribute('data-autofilled');
+                }
             });
+
+            const otrosDesc = document.getElementById('equipo-otros-desc');
+            const otrosCb = document.getElementById('equipo-otros');
+            if (otrosDesc && otrosCb) {
+                otrosDesc.addEventListener('input', () => {
+                    if (otrosDesc.value.trim() !== '') {
+                        otrosCb.checked = true;
+                    }
+                });
+            }
 
             form.addEventListener('submit', function (event) {
                 event.preventDefault();
@@ -1747,7 +1860,13 @@
                                 } else {
                                     const clonedInput = clonedForm.querySelector(`[name="${CSS.escape(input.name)}"]`);
                                     if (clonedInput) {
-                                        const val = input.value || '';
+                                        let val = input.value || '';
+                                        if (input.id === 'observaciones' || input.name === 'observaciones' || input.id === 'observaciones-cliente' || input.name === 'observaciones-cliente') {
+                                            if (!val.trim()) {
+                                                val = 'Sin observación/recomendación';
+                                            }
+                                        }
+
                                         const isTextarea = input.tagName.toLowerCase() === 'textarea';
                                         const isActividad = input.id === 'actividad-realizada' || input.name === 'actividad-realizada';
                                         
@@ -1768,10 +1887,34 @@
                                         textDiv.style.overflow = 'visible';
                                         textDiv.textContent = val;
 
+                                        if (input.id === 'fecha' || input.name === 'fecha') {
+                                            textDiv.style.width = 'auto';
+                                            textDiv.style.minWidth = '95px';
+                                            textDiv.style.textAlign = 'center';
+                                            textDiv.style.fontWeight = 'bold';
+                                            textDiv.style.display = 'inline-block';
+                                        }
+
+                                        if (input.id === 'equipo-otros-desc' || input.name === 'equipo_otros_desc') {
+                                            textDiv.style.display = 'inline-block';
+                                            textDiv.style.width = '130px';
+                                            textDiv.style.minHeight = '18px';
+                                            textDiv.style.border = 'none';
+                                            textDiv.style.borderBottom = '1px dotted #475569';
+                                            textDiv.style.borderRadius = '0';
+                                            textDiv.style.padding = '0 3px';
+                                            textDiv.style.verticalAlign = 'middle';
+                                        }
+
                                         clonedInput.parentNode.replaceChild(textDiv, clonedInput);
                                     }
                                 }
                             }
+                        });
+
+                        clonedDoc.body.style.fontFamily = 'Arial, "Helvetica Neue", Helvetica, sans-serif';
+                        clonedDoc.querySelectorAll('*').forEach(el => {
+                            el.style.fontFamily = 'Arial, "Helvetica Neue", Helvetica, sans-serif';
                         });
 
                         clonedDoc.querySelectorAll('.signature-button, .form-actions').forEach(el => {
@@ -1791,7 +1934,7 @@
 
                     const pdfWidth = pdf.internal.pageSize.getWidth();
                     const pdfHeight = pdf.internal.pageSize.getHeight();
-                    const margin = 4;
+                    const margin = 2;
 
                     const availableWidth = pdfWidth - (margin * 2);
                     const availableHeight = pdfHeight - (margin * 2);
